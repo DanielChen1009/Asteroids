@@ -5,12 +5,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Line2D;
+import java.util.ArrayList;
 
 
 public class GUI extends JPanel implements KeyListener, ActionListener {
     private int width, height;
     private Timer timer;
     private Game game;
+    private JLabel label;
 
     public GUI(int width, int height) {
         this.width = width;
@@ -33,9 +35,12 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
         g.fillRect(0, 0, this.width, this.height);
         g.setColor(Color.WHITE);
         Graphics2D g2d = (Graphics2D) g;
-        g2d.draw(new Line2D.Double(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p2.x, game.getShip().p2.y));
-        g2d.draw(new Line2D.Double(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p3.x, game.getShip().p3.y));
-        g2d.draw(new Line2D.Double(game.getShip().p3.x, game.getShip().p3.y, game.getShip().p2.x, game.getShip().p2.y));
+        int size = this.game.getShip().points.size();
+        for(int i = 0; i < size; ++i){
+            g2d.draw(new Line2D.Double(this.game.getShip().points.get(i % size).x, this.game.getShip().points.get(i % size).y, this.game.getShip().points.get((i + 1) % size).x, this.game.getShip().points.get((i + 1) % size).y));
+        }
+        label = new JLabel("Angle" + this.game.getShip().getAngle());
+        this.add(label);
     }
 
     @Override
