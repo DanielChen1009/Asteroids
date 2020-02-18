@@ -20,18 +20,40 @@ class Ship {
         this.p3 = p1.add(new Point(-10, 25));
     }
 
+    public void transform(Point p) {
+        p1 = p1.add(p);
+        p2 = p2.add(p);
+        p3 = p3.add(p);
+    }
+
 }
 
 public class Game {
+    public int acceleration;
     private Ship ship;
-    private Point startPoint;
+    private int dy;
 
     public Game(int width, int height) {
-        startPoint = new Point(width / 2, height / 2);
+        Point startPoint = new Point(width / 2, height / 2);
         ship = new Ship(startPoint);
     }
 
     public Ship getShip() {
         return ship;
     }
+
+    public void update() {
+        dy = dy + acceleration;
+        if(dy == 0) acceleration = 0;
+        this.ship.transform(new Point(0, dy));
+    }
+
+    public int getAcceleration() {
+        return acceleration;
+    }
+
+    public int getDy() {
+        return dy;
+    }
+
 }

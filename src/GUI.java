@@ -6,7 +6,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 
-
 public class GUI extends JPanel implements KeyListener, ActionListener {
     private int width, height;
     private Timer timer;
@@ -15,8 +14,9 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
     public GUI(int width, int height) {
         this.width = width;
         this.height = height;
+        this.addKeyListener(this);
         this.game = new Game(this.width, this.height);
-        timer = new Timer(1, this);
+        timer = new Timer(30, this);
         timer.start();
     }
 
@@ -31,11 +31,9 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, this.width, this.height);
         g.setColor(Color.WHITE);
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setStroke(new BasicStroke(2f));
-        g2d.drawLine(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p2.x, game.getShip().p2.y);
-        g2d.drawLine(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p3.x, game.getShip().p3.y);
-        g2d.drawLine(game.getShip().p3.x, game.getShip().p3.y, game.getShip() .p2.x, game.getShip().p2.y);
+        g.drawLine(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p2.x, game.getShip().p2.y);
+        g.drawLine(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p3.x, game.getShip().p3.y);
+        g.drawLine(game.getShip().p3.x, game.getShip().p3.y, game.getShip().p2.x, game.getShip().p2.y);
     }
 
     @Override
@@ -45,19 +43,17 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            this.game.getShip().p1.x = 10;
-        }
-        repaint();
+        if (e.getKeyCode() == KeyEvent.VK_UP) this.game.acceleration = -1;
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-
+        if (e.getKeyCode() == KeyEvent.VK_UP) this.game.acceleration = 1;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        this.game.update();
+        this.repaint();
     }
 }
