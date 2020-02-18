@@ -13,6 +13,7 @@ class Point {
 
 class Ship {
     Point p1, p2, p3;
+    double dx, dy;
     private double angle;
     private Point center;
     private int degreeIncrement = 10;
@@ -25,15 +26,19 @@ class Ship {
         center = p1.add(new Point(0, 14.5));
     }
 
-    public void transform(double v) {
-        p1.x += Math.cos(angle) * v;
-        p1.y += Math.sin(angle) * v;
-        p2.x += Math.cos(angle) * v;
-        p2.y += Math.sin(angle) * v;
-        p3.x += Math.cos(angle) * v;
-        p3.y += Math.sin(angle) * v;
-        center.x += Math.cos(angle) * v;
-        center.y += Math.sin(angle) * v;
+    public void move(double a) {
+        double v = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+        a = a - v * v * -0.03;
+        dx += a * Math.cos(angle);
+        dy += a * Math.sin(angle);
+        p1.x += dx;
+        p1.y += dy;
+        p2.x += dx;
+        p2.y += dy;
+        p3.x += dx;
+        p3.y += dy;
+        center.x += dx;
+        center.y += dy;
     }
 
     public void rotateL() {
@@ -122,8 +127,7 @@ public class Game {
         if (isTurningLeft) ship.rotateL();
         if (isTurningRight) ship.rotateR();
         int acceleration = isAccelerating ? -1 : 0;
-        v = v + (double) acceleration - v * v * (-0.03);
-        this.ship.transform(v);
+        this.ship.move(acceleration);
     }
 
     public void setAccelerating(boolean bool) {
