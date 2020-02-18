@@ -1,7 +1,7 @@
 class Point {
-    int x, y;
+    double x, y;
 
-    public Point(int x, int y) {
+    public Point(double x, double y) {
         this.x = x;
         this.y = y;
     }
@@ -13,28 +13,104 @@ class Point {
 
 class Ship {
     Point p1, p2, p3;
+    private double angle;
+    private Point center;
+    private int degreeIncrement = 10;
 
     public Ship(Point p1) {
         this.p1 = p1;
         this.p2 = p1.add(new Point(10, 25));
         this.p3 = p1.add(new Point(-10, 25));
+        angle = Math.PI / 2;
+        center = p1.add(new Point(0, 14.5));
     }
 
-    public void transform(Point p) {
-        p1 = p1.add(p);
-        p2 = p2.add(p);
-        p3 = p3.add(p);
+    public void transform(double v) {
+        p1.x += Math.cos(angle) * v;
+        p1.y += Math.sin(angle) * v;
+        p2.x += Math.cos(angle) * v;
+        p2.y += Math.sin(angle) * v;
+        p3.x += Math.cos(angle) * v;
+        p3.y += Math.sin(angle) * v;
+        center.x += Math.cos(angle) * v;
+        center.y += Math.sin(angle) * v;
+    }
+
+    public void rotateL() {
+        p1.x -= center.x;
+        p1.y -= center.y;
+
+        double newx1 = p1.x * Math.cos(-1 * degreeIncrement * Math.PI / 180) - p1.y * Math.sin(-1 * degreeIncrement * Math.PI / 180);
+        double newy1 = p1.x * Math.sin(-1 * degreeIncrement * Math.PI / 180) + p1.y * Math.cos(-1 * degreeIncrement * Math.PI / 180);
+
+        p1.x = newx1 + center.x;
+        p1.y = newy1 + center.y;
+
+
+        p2.x -= center.x;
+        p2.y -= center.y;
+
+        double newx2 = p2.x * Math.cos(-1 * degreeIncrement * Math.PI / 180) - p2.y * Math.sin(-1 * degreeIncrement * Math.PI / 180);
+        double newy2 = p2.x * Math.sin(-1 * degreeIncrement * Math.PI / 180) + p2.y * Math.cos(-1 * degreeIncrement * Math.PI / 180);
+
+        p2.x = newx2 + center.x;
+        p2.y = newy2 + center.y;
+
+
+        p3.x -= center.x;
+        p3.y -= center.y;
+
+        double newx3 = p3.x * Math.cos(-1 * degreeIncrement * Math.PI / 180) - p3.y * Math.sin(-1 * degreeIncrement * Math.PI / 180);
+        double newy3 = p3.x * Math.sin(-1 * degreeIncrement * Math.PI / 180) + p3.y * Math.cos(-1 * degreeIncrement * Math.PI / 180);
+
+        p3.x = newx3 + center.x;
+        p3.y = newy3 + center.y;
+        angle += -1 * degreeIncrement * Math.PI / 180;
+    }
+
+    public void rotateR() {
+        p1.x -= center.x;
+        p1.y -= center.y;
+
+        double newx1 = p1.x * Math.cos(degreeIncrement * Math.PI / 180) - p1.y * Math.sin(degreeIncrement * Math.PI / 180);
+        double newy1 = p1.x * Math.sin(degreeIncrement * Math.PI / 180) + p1.y * Math.cos(degreeIncrement * Math.PI / 180);
+
+        p1.x = newx1 + center.x;
+        p1.y = newy1 + center.y;
+
+
+        p2.x -= center.x;
+        p2.y -= center.y;
+
+        double newx2 = p2.x * Math.cos(degreeIncrement * Math.PI / 180) - p2.y * Math.sin(degreeIncrement * Math.PI / 180);
+        double newy2 = p2.x * Math.sin(degreeIncrement * Math.PI / 180) + p2.y * Math.cos(degreeIncrement * Math.PI / 180);
+
+        p2.x = newx2 + center.x;
+        p2.y = newy2 + center.y;
+
+
+        p3.x -= center.x;
+        p3.y -= center.y;
+
+        double newx3 = p3.x * Math.cos(degreeIncrement * Math.PI / 180) - p3.y * Math.sin(degreeIncrement * Math.PI / 180);
+        double newy3 = p3.x * Math.sin(degreeIncrement * Math.PI / 180) + p3.y * Math.cos(degreeIncrement * Math.PI / 180);
+
+        p3.x = newx3 + center.x;
+        p3.y = newy3 + center.y;
+        angle += degreeIncrement * Math.PI / 180;
     }
 
 }
 
 public class Game {
-    public int acceleration;
+    private boolean isAccelerating;
+    private boolean isTurningLeft;
+    private boolean isTurningRight;
     private Ship ship;
-    private int dy;
+    private double v;
 
     public Game(int width, int height) {
-        Point startPoint = new Point(width / 2, height / 2);
+        Point startPoint = new Point((double) width / 2, (double) height / 2);
         ship = new Ship(startPoint);
     }
 
@@ -43,17 +119,27 @@ public class Game {
     }
 
     public void update() {
-        dy = dy + acceleration;
-        if(dy == 0) acceleration = 0;
-        this.ship.transform(new Point(0, dy));
+        if (isTurningLeft) ship.rotateL();
+        if (isTurningRight) ship.rotateR();
+        int acceleration = isAccelerating ? -1 : 0;
+        v = v + (double) acceleration - v * v * (-0.03);
+        this.ship.transform(v);
     }
 
-    public int getAcceleration() {
-        return acceleration;
+    public void setAccelerating(boolean bool) {
+        isAccelerating = bool;
     }
 
-    public int getDy() {
-        return dy;
+    public double getV() {
+        return v;
+    }
+
+    public void setTurningLeft(boolean turningLeft) {
+        isTurningLeft = turningLeft;
+    }
+
+    public void setTurningRight(boolean turningRight) {
+        isTurningRight = turningRight;
     }
 
 }

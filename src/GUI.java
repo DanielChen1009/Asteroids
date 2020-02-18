@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Line2D;
 
 
 public class GUI extends JPanel implements KeyListener, ActionListener {
@@ -31,9 +32,10 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, this.width, this.height);
         g.setColor(Color.WHITE);
-        g.drawLine(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p2.x, game.getShip().p2.y);
-        g.drawLine(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p3.x, game.getShip().p3.y);
-        g.drawLine(game.getShip().p3.x, game.getShip().p3.y, game.getShip().p2.x, game.getShip().p2.y);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.draw(new Line2D.Double(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p2.x, game.getShip().p2.y));
+        g2d.draw(new Line2D.Double(game.getShip().p1.x, game.getShip().p1.y, game.getShip().p3.x, game.getShip().p3.y));
+        g2d.draw(new Line2D.Double(game.getShip().p3.x, game.getShip().p3.y, game.getShip().p2.x, game.getShip().p2.y));
     }
 
     @Override
@@ -43,12 +45,16 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_UP) this.game.acceleration = -1;
+        if (e.getKeyCode() == KeyEvent.VK_UP) this.game.setAccelerating(true);
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) this.game.setTurningLeft(true);
+        if (e.getKeyCode() == KeyEvent.VK_RIGHT) this.game.setTurningRight(true);
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_UP) this.game.acceleration = 1;
+        if (e.getKeyCode() == KeyEvent.VK_UP) this.game.setAccelerating(false);
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) this.game.setTurningLeft(false);
+        if (e.getKeyCode() == KeyEvent.VK_RIGHT) this.game.setTurningRight(false);
     }
 
     @Override
