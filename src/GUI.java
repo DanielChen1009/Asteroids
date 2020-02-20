@@ -19,6 +19,7 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
         this.height = height;
         this.addKeyListener(this);
         this.game = new Game(this.width, this.height);
+        label = new JLabel("Angle" + this.game.getShip().getAngle());
         timer = new Timer(30, this);
         timer.start();
     }
@@ -39,8 +40,11 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
         for(int i = 0; i < size; ++i){
             g2d.draw(new Line2D.Double(this.game.getShip().points.get(i % size).x, this.game.getShip().points.get(i % size).y, this.game.getShip().points.get((i + 1) % size).x, this.game.getShip().points.get((i + 1) % size).y));
         }
-        label = new JLabel("Angle" + this.game.getShip().getAngle());
-        this.add(label);
+        if(this.game.isTransitioning) {
+            for(int i = 0; i < this.game.transitionShip.points.size(); ++i){
+                g2d.draw(new Line2D.Double(this.game.transitionShip.points.get(i % size).x, this.game.transitionShip.points.get(i % size).y, this.game.transitionShip.points.get((i + 1) % size).x, this.game.transitionShip.points.get((i + 1) % size).y));
+            }
+        }
     }
 
     @Override
@@ -64,6 +68,7 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        this.add(label);
         this.game.update();
         this.repaint();
     }
