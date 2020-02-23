@@ -28,7 +28,7 @@ class Ship {
     double dx, dy, ax, ay;
     double angle;
     private Point center;
-    private int degreeIncrement = 15;
+    private final int degreeIncrement = 15;
 
     public Ship(Point p1, double angle, double dx, double dy) {
         points = new ArrayList<>();
