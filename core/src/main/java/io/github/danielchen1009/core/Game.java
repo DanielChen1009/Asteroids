@@ -1,3 +1,5 @@
+package io.github.danielchen1009.core;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,11 +26,11 @@ class Point {
 }
 
 class Ship {
+    private final int degreeIncrement = 15;
     List<Point> points;
     double dx, dy, ax, ay;
     double angle;
     private Point center;
-    private final int degreeIncrement = 15;
 
     public Ship(Point p1, double angle, double dx, double dy) {
         points = new ArrayList<>();

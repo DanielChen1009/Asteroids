@@ -5,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Line2D;
-import java.util.ArrayList;
 
 
 public class GUI extends JPanel implements KeyListener, ActionListener {
@@ -37,11 +36,11 @@ public class GUI extends JPanel implements KeyListener, ActionListener {
         g.setColor(Color.WHITE);
         Graphics2D g2d = (Graphics2D) g;
         int size = this.game.getShip().points.size();
-        for(int i = 0; i < size; ++i){
+        for (int i = 0; i < size; ++i) {
             g2d.draw(new Line2D.Double(this.game.getShip().points.get(i % size).x, this.game.getShip().points.get(i % size).y, this.game.getShip().points.get((i + 1) % size).x, this.game.getShip().points.get((i + 1) % size).y));
         }
-        if(this.game.isTransitioning) {
-            for(int i = 0; i < this.game.transitionShip.points.size(); ++i){
+        if (this.game.isTransitioning && this.game.transitionShip != null) {
+            for (int i = 0; i < this.game.transitionShip.points.size(); ++i) {
                 g2d.draw(new Line2D.Double(this.game.transitionShip.points.get(i % size).x, this.game.transitionShip.points.get(i % size).y, this.game.transitionShip.points.get((i + 1) % size).x, this.game.transitionShip.points.get((i + 1) % size).y));
             }
         }

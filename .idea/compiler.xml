@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="asteroids-assets" />
+        <module name="asteroids-java" />
+        <module name="asteroids-core" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Asteroids" target="1.5" />
+      <module name="asteroids-assets" target="1.7" />
+      <module name="asteroids-core" target="1.7" />
+      <module name="asteroids-java" target="1.7" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="asteroids-assets" options="-Xlint -Xlint:-serial -Xlint:-path" />
+      <module name="asteroids-core" options="-Xlint -Xlint:-serial -Xlint:-path" />
+      <module name="asteroids-java" options="-Xlint -Xlint:-serial -Xlint:-path" />
+    </option>
+  </component>
+</project>
