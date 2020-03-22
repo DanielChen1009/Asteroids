@@ -13,7 +13,7 @@ public class GameView extends Layer {
     public GameView(Game game, IDimension viewSize) {
         this.game = game;
         this.viewSize = viewSize;
-        float maxBoardSize = Math.min(viewSize.width(), viewSize.height()) - 20;
+        float maxBoardSize = Math.min(viewSize.width(), viewSize.height());
     }
 
     // we want two extra pixels in width/height to account for the grid lines
@@ -31,15 +31,23 @@ public class GameView extends Layer {
     protected void paintImpl(Surface surf) {
         surf.setFillColor(0xFF000000); // black with full alpha
         float top = 0, bot = height(), left = 0, right = width();
-        int size = this.game.getShip().points.size();
+        surf.fillRect(0, 0, width(), height());
         surf.setFillColor(0xFFFFFFFF);
-        for (int i = 0; i < size; ++i) {
-            surf.drawLine((float) this.game.getShip().points.get(i % size).x, (float) this.game.getShip().points.get(i % size).y, (float) this.game.getShip().points.get((i + 1) % size).x, (float) this.game.getShip().points.get((i + 1) % size).y, LINE_WIDTH);
+        paintBody(surf, this.game.getShip().primaryBody);
+        for (Body wrapBody : this.game.getShip().wrapBodies.values()) {
+            paintBody(surf, wrapBody);
         }
-        if (this.game.isTransitioning && this.game.transitionShip != null) {
-            for (int i = 0; i < this.game.transitionShip.points.size(); ++i) {
-                surf.drawLine((float) this.game.transitionShip.points.get(i % size).x, (float) this.game.transitionShip.points.get(i % size).y, (float) this.game.transitionShip.points.get((i + 1) % size).x, (float) this.game.transitionShip.points.get((i + 1) % size).y, LINE_WIDTH);
-            }
+    }
+
+    private void paintBody(Surface surf, Body body) {
+        int size = body.getPoints().size();
+        for (int i = 0; i < size; ++i) {
+            surf.drawLine(
+                    (float) (body.getCenter().x + body.getPoints().get(i % size).x) * width(),
+                    (float) (body.getCenter().y + body.getPoints().get(i % size).y) * height(),
+                    (float) (body.getCenter().x + body.getPoints().get((i + 1) % size).x) * width(),
+                    (float) (body.getCenter().y + body.getPoints().get((i + 1) % size).y) * height(),
+                    LINE_WIDTH);
         }
     }
 }

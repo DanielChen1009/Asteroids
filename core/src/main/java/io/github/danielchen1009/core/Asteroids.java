@@ -22,13 +22,13 @@ public class Asteroids extends SceneGame {
 
         switch (event.key) {
           case LEFT:
-            game.setTurningLeft(event.down);
+            game.setTurningLeft();
             break;
           case UP:
             game.setAccelerating(event.down);
             break;
           case RIGHT:
-            game.setTurningRight(event.down);
+            game.setTurningRight();
             break;
           default:
             break; // nada
@@ -38,7 +38,7 @@ public class Asteroids extends SceneGame {
     // create a layer that just draws a black background
     rootLayer.add(new Layer() {
       protected void paintImpl(Surface surf) {
-        surf.setFillColor(0xFF000000).fillRect(0, 0, size.width(), size.height());
+        surf.setFillColor(0xFFFFFFFF).fillRect(0, 0, size.width(), size.height());
       }
     });
 
