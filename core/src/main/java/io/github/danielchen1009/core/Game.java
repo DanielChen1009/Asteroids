@@ -1,39 +1,56 @@
 package io.github.danielchen1009.core;
 
-public class Game {
-    boolean isTransitioningR, isTransitioningL, isTransitioningU, isTransitioningD, isTransitioning;
-    Ship transitionShip;
-    private boolean isAccelerating;
-    private boolean isTurningLeft;
-    private boolean isTurningRight;
-    private Ship ship;
-    private int width, height;
-    private double v;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-    public Game(int width, int height) {
-        this.width = width;
-        this.height = height;
+public class Game {
+    private Ship ship;
+    private List<Entity> entities;
+    private int cooldown;
+
+    public Game() {
         Point startPoint = new Point(0.5, 0.5);
         this.ship = new Ship(startPoint);
-    }
+        this.entities = new ArrayList<>();
+        entities.add(this.ship);
 
-    public Ship getShip() {
-        return ship;
+        for (int i = 0; i < 10; ++i) {
+            Rock rock = new Rock(startPoint.copy(), 0.1);
+            entities.add(rock);
+        }
     }
 
     public void update() {
-        ship.update();
+        Iterator<Entity> itr = entities.iterator();
+        while (itr.hasNext()) {
+            Entity entity = itr.next();
+            if (!entity.isActive()) itr.remove();
+            else entity.update();
+        }
     }
 
     public void setAccelerating(boolean accelerating) {
-        ship.accelerate(accelerating ? 0.0005 : -0.0005);
+        ship.accelerate(accelerating ? 0.0005 : 0);
     }
 
-    public void setTurningLeft() {
-        ship.rotateTravel(-0.07);
+    public void setTurningLeft(boolean turningLeft) {
+        ship.turningLeft = turningLeft;
     }
 
-    public void setTurningRight() {
-        ship.rotateTravel(0.07);
+    public void setTurningRight(boolean turningRight) {
+        ship.turningRight = turningRight;
+    }
+
+    public List<Entity> getEntities() {
+        return entities;
+    }
+
+    public void setFiring() {
+
+        Point bulletLoc = this.ship.primaryBody.getCenter().copy();
+        bulletLoc.add(ship.primaryBody.getPoints().get(0));
+        Bullet bullet = new Bullet(bulletLoc, this.ship.bodyAngle);
+        entities.add(bullet);
     }
 }

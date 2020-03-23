@@ -81,13 +81,13 @@ public class Entity {
     protected Map<Edge, Body> wrapBodies;
 
     // traveling and orientation variables.
-    protected double speed;
+    protected double dx;
+    protected double dy;
     // units of the angles are radians.
     protected double travelAngle;
     protected double bodyAngle;
 
-    public Entity(Point center, List<Point> primaryBody) {
-        this.primaryBody = new Body(primaryBody, center);
+    public Entity() {
         this.wrapBodies = new HashMap<>();
     }
 
@@ -96,7 +96,6 @@ public class Entity {
         Body prevBody = wrapBodies.isEmpty() ? primaryBody : wrapBodies.values().iterator().next();
         for (Edge edge : outOfBounds) {
             if (!wrapBodies.containsKey(edge)) {
-                System.out.println(prevBody);
                 Body wrapBody = prevBody.copy();
                 wrapBody.wrap(edge);
                 wrapBodies.put(edge, wrapBody);
@@ -114,8 +113,6 @@ public class Entity {
 
         if (primaryBody.isOutOfBounds().isEmpty()) wrapBodies.clear();
 
-        double dx = this.speed * Math.cos(this.travelAngle);
-        double dy = this.speed * Math.sin(this.travelAngle);
         primaryBody.rotateTo(bodyAngle);
         primaryBody.translate(new Point(dx, dy));
         for (Body wrapBody : wrapBodies.values()) {
@@ -124,16 +121,20 @@ public class Entity {
         }
     }
 
-    public void setSpeed(double speed) {
-        this.speed = speed;
-    }
-
     public void rotateBody(double angle) {
         this.bodyAngle += angle;
     }
 
     public void rotateTravel(double angle) {
         this.travelAngle += angle;
+    }
+
+    public void setPrimaryBody(Body primaryBody) {
+        this.primaryBody = primaryBody;
+    }
+
+    public boolean isActive() {
+        return true;
     }
 }
 

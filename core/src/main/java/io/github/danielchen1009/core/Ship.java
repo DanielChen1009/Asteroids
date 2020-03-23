@@ -4,23 +4,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Ship extends Entity {
-    private static final double SIZE = 0.05;
+    private static final double SIZE = 0.025;
     private static final double ANGLE = Math.PI / 3;
     double acceleration;
+    boolean turningLeft, turningRight;
 
     public Ship(Point center) {
-        super(center, new ArrayList<>(Arrays.asList(
-                new Point(SIZE, 0),
+        this.setPrimaryBody(new Body(new ArrayList<>(Arrays.asList(
+                new Point(4 * SIZE / 5, 0),
                 new Point(SIZE * Math.sin(4 * ANGLE), SIZE * Math.cos(4 * ANGLE)),
-                new Point(SIZE * Math.sin(-ANGLE), SIZE * Math.cos(-ANGLE)))));
+                new Point(SIZE * Math.sin(-ANGLE), SIZE * Math.cos(-ANGLE)))), center));
     }
 
     @Override
     public void update() {
-        //acceleration -= speed * speed * 0.014;
-        speed += acceleration;
-        if (speed < 0) speed = 0;
-        if (speed > 0.05) speed = 0.05;
+        if (turningLeft) rotateTravel(-Math.PI / 24);
+        if (turningRight) rotateTravel(Math.PI / 24);
+        double ax = acceleration * Math.cos(travelAngle) - dx * Math.abs(dx) * 1;
+        double ay = acceleration * Math.sin(travelAngle) - dy * Math.abs(dy) * 1;
+        dx += ax;
+        dy += ay;
         super.update();
     }
 

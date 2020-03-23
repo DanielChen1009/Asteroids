@@ -33,8 +33,12 @@ public class GameView extends Layer {
         float top = 0, bot = height(), left = 0, right = width();
         surf.fillRect(0, 0, width(), height());
         surf.setFillColor(0xFFFFFFFF);
-        paintBody(surf, this.game.getShip().primaryBody);
-        for (Body wrapBody : this.game.getShip().wrapBodies.values()) {
+        for (Entity entity : game.getEntities()) paintEntity(surf, entity);
+    }
+
+    private void paintEntity(Surface surf, Entity entity) {
+        paintBody(surf, entity.primaryBody);
+        for (Body wrapBody : entity.wrapBodies.values()) {
             paintBody(surf, wrapBody);
         }
     }
