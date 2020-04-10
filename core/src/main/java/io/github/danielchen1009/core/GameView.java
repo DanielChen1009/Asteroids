@@ -38,12 +38,13 @@ public class GameView extends Layer {
 
     private void paintEntity(Surface surf, Entity entity) {
         paintBody(surf, entity.primaryBody);
-        for (Body wrapBody : entity.wrapBodies.values()) {
+        for (EntityBody wrapBody : entity.wrapBodies.values()) {
+            if (!wrapBody.wrapped) continue;
             paintBody(surf, wrapBody);
         }
     }
 
-    private void paintBody(Surface surf, Body body) {
+    private void paintBody(Surface surf, EntityBody body) {
         int size = body.getPoints().size();
         for (int i = 0; i < size; ++i) {
             surf.drawLine(

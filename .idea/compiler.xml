@@ -9,12 +9,14 @@
         <module name="asteroids-assets" />
         <module name="asteroids-java" />
         <module name="asteroids-core" />
+        <module name="asteroids-html" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="Asteroids" target="1.5" />
       <module name="asteroids-assets" target="1.7" />
       <module name="asteroids-core" target="1.7" />
+      <module name="asteroids-html" target="1.7" />
       <module name="asteroids-java" target="1.7" />
     </bytecodeTargetLevel>
   </component>
@@ -22,6 +24,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="asteroids-assets" options="-Xlint -Xlint:-serial -Xlint:-path" />
       <module name="asteroids-core" options="-Xlint -Xlint:-serial -Xlint:-path" />
+      <module name="asteroids-html" options="-Xlint -Xlint:-serial -Xlint:-path" />
       <module name="asteroids-java" options="-Xlint -Xlint:-serial -Xlint:-path" />
     </option>
   </component>
