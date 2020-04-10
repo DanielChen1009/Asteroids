@@ -12,6 +12,7 @@ public class AsteroidsHtml implements EntryPoint {
     HtmlPlatform plat = new HtmlPlatform(config);
     plat.assets().setPathPrefix("asteroids/");
     plat.graphics().setSize(400, 400);
+    plat.setTitle("Asteroids");
     new Asteroids(plat);
     plat.start();
   }

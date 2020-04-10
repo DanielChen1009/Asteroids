@@ -10,6 +10,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="asteroids-core" />
+    <orderEntry type="library" name="Maven: io.playn:playn-jbox2d:2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.jbox2d:jbox2d-library:2.2.1.1" level="project" />
     <orderEntry type="library" name="Maven: io.playn:playn-scene:2.0" level="project" />
     <orderEntry type="module" module-name="asteroids-core" />
     <orderEntry type="module" module-name="asteroids-assets" />

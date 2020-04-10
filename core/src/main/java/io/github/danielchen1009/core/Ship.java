@@ -1,5 +1,7 @@
 package io.github.danielchen1009.core;
 
+import org.jbox2d.dynamics.World;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -9,8 +11,9 @@ public class Ship extends Entity {
     double acceleration;
     boolean turningLeft, turningRight;
 
-    public Ship(Point center) {
-        this.setPrimaryBody(new Body(new ArrayList<>(Arrays.asList(
+    public Ship(World world, Point center) {
+        super("SHIP");
+        this.setPrimaryBody(new EntityBody(world, new ArrayList<>(Arrays.asList(
                 new Point(4 * SIZE / 5, 0),
                 new Point(SIZE * Math.sin(4 * ANGLE), SIZE * Math.cos(4 * ANGLE)),
                 new Point(SIZE * Math.sin(-ANGLE), SIZE * Math.cos(-ANGLE)))), center));

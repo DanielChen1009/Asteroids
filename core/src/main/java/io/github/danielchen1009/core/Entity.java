@@ -1,5 +1,9 @@
 package io.github.danielchen1009.core;
 
+import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.*;
+
 import java.util.*;
 
 enum Edge {
@@ -14,32 +18,51 @@ enum Edge {
     }
 }
 
-class Body {
+class EntityBody {
+    boolean wrapped;
     private List<Point> model;
     private List<Point> points;
     private Point center;
+    private World world;
+    private Body body;
+    private float angle;
 
-    public Body(List<Point> points, Point center) {
+
+    public EntityBody(World world, List<Point> points, Point center) {
+        this.world = world;
         this.model = points;
         this.points = new ArrayList<>();
         for (Point point : model) {
             this.points.add(point.copy());
         }
         this.center = center;
+        this.angle = 0;
+        this.wrapped = false;
+
+        FixtureDef fixtureDef = new FixtureDef();
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyType.DYNAMIC;
+        bodyDef.position = new Vec2(0, 0);
+        this.body = world.createBody(bodyDef);
+
+        PolygonShape polygonShape = new PolygonShape();
+        Vec2[] polygon = new Vec2[points.size()];
+        for (int i = 0; i < points.size(); ++i) {
+            Point point = points.get(i);
+            polygon[i] = new Vec2((float) point.x, (float) point.y);
+        }
+        polygonShape.set(polygon, polygon.length);
+        fixtureDef.shape = polygonShape;
+        fixtureDef.restitution = 1f;
+        body.createFixture(fixtureDef);
+        body.setTransform(new Vec2((float) center.x, (float) center.y), angle);
     }
 
-    void rotateTo(double angle) {
-        for (int i = 0; i < model.size(); ++i) {
-            Point p = points.get(i);
-            Point modelP = model.get(i);
-            p.x = modelP.x * Math.cos(angle) - modelP.y * Math.sin(angle);
-            p.y = modelP.y * Math.cos(angle) + modelP.x * Math.sin(angle);
-        }
-    }
 
     void wrap(Edge edge) {
-        this.center.x += edge.dx;
-        this.center.y += edge.dy;
+        Point p = this.center.copy();
+        p.add(new Point(edge.dx, edge.dy));
+        moveTo(p, angle);
     }
 
     public Set<Edge> isOutOfBounds() {
@@ -53,8 +76,8 @@ class Body {
         return edges;
     }
 
-    Body copy() {
-        return new Body(new ArrayList<>(model), center.copy());
+    EntityBody copy() {
+        return new EntityBody(world, new ArrayList<>(model), center.copy());
     }
 
     public List<Point> getPoints() {
@@ -65,76 +88,121 @@ class Body {
         return center;
     }
 
-    void translate(Point p) {
-        center.add(p);
+    void moveTo(Point point, float angle) {
+        center = point.copy();
+        this.angle = angle;
+        for (int i = 0; i < model.size(); ++i) {
+            Point p = points.get(i);
+            Point modelP = model.get(i);
+            p.x = modelP.x * Math.cos(angle) - modelP.y * Math.sin(angle);
+            p.y = modelP.y * Math.cos(angle) + modelP.x * Math.sin(angle);
+        }
+        body.setTransform(new Vec2((float) center.x, (float) center.y), angle);
+    }
+
+    Body getBody() {
+        return body;
+    }
+
+    float getAngle() {
+        return angle;
     }
 
     @Override
     public String toString() {
         return center.toString();
     }
+
+
 }
 
 public class Entity {
+    public String type;
     // Relative to the center. x,y are normalized to [0, 1].
-    protected Body primaryBody;
-    protected Map<Edge, Body> wrapBodies;
+    protected EntityBody primaryBody;
+    protected Map<Edge, EntityBody> wrapBodies;
 
     // traveling and orientation variables.
     protected double dx;
     protected double dy;
     // units of the angles are radians.
-    protected double travelAngle;
-    protected double bodyAngle;
+    protected float travelAngle;
+    protected float bodyAngle;
 
-    public Entity() {
+    protected boolean active;
+
+    public Entity(String type) {
         this.wrapBodies = new HashMap<>();
+        active = true;
+        this.type = type;
+        travelAngle = 0;
+        bodyAngle = 0;
     }
 
     public void update() {
+        // Wrap any bodies when primary body is out of bounds.
         Set<Edge> outOfBounds = primaryBody.isOutOfBounds();
-        Body prevBody = wrapBodies.isEmpty() ? primaryBody : wrapBodies.values().iterator().next();
         for (Edge edge : outOfBounds) {
-            if (!wrapBodies.containsKey(edge)) {
-                Body wrapBody = prevBody.copy();
-                wrapBody.wrap(edge);
-                wrapBodies.put(edge, wrapBody);
-            }
-            prevBody = wrapBodies.get(edge);
-        }
-
-        for (Body wrapBody : wrapBodies.values()) {
-            if (wrapBody.isOutOfBounds().isEmpty()) {
-                primaryBody = wrapBody.copy();
-                wrapBodies.clear();
-                break;
+            EntityBody body = wrapBodies.get(edge);
+            if (!body.wrapped) {
+                body.wrap(edge);
+                body.wrapped = true;
+                System.out.println(edge);
             }
         }
 
-        if (primaryBody.isOutOfBounds().isEmpty()) wrapBodies.clear();
+        if (primaryBody.isOutOfBounds().isEmpty()) {
+            for (EntityBody body : wrapBodies.values()) {
+                body.moveTo(primaryBody.getCenter(), primaryBody.getAngle());
+                body.wrapped = false;
+            }
+        } else {
+            for (EntityBody wrapBody : wrapBodies.values()) {
+                if (wrapBody.isOutOfBounds().isEmpty()) {
+                    primaryBody.moveTo(wrapBody.getCenter(), wrapBody.getAngle());
+                    for (EntityBody body : wrapBodies.values()) {
+                        body.moveTo(wrapBody.getCenter(), wrapBody.getAngle());
+                        body.wrapped = false;
+                    }
+                    System.out.println("Nigger");
+                    break;
+                }
+            }
+        }
 
-        primaryBody.rotateTo(bodyAngle);
-        primaryBody.translate(new Point(dx, dy));
-        for (Body wrapBody : wrapBodies.values()) {
-            wrapBody.rotateTo(bodyAngle);
-            wrapBody.translate(new Point(dx, dy));
+        // TODO: fix edge case where entity disappears
+        Point p = primaryBody.getCenter().copy();
+        p.add(new Point(dx, dy));
+        primaryBody.moveTo(p, bodyAngle);
+        for (EntityBody wrapBody : wrapBodies.values()) {
+            Point p1 = wrapBody.getCenter().copy();
+            p1.add(new Point(dx, dy));
+            wrapBody.moveTo(p1, bodyAngle);
         }
     }
 
-    public void rotateBody(double angle) {
-        this.bodyAngle += angle;
+    public void rotateBody(double dTheta) {
+        this.bodyAngle += dTheta;
     }
 
-    public void rotateTravel(double angle) {
-        this.travelAngle += angle;
+    public void rotateTravel(double dTheta) {
+        this.travelAngle += dTheta;
     }
 
-    public void setPrimaryBody(Body primaryBody) {
+    public void setPrimaryBody(EntityBody primaryBody) {
         this.primaryBody = primaryBody;
+        wrapBodies.put(Edge.DOWN, primaryBody.copy());
+        wrapBodies.put(Edge.UP, primaryBody.copy());
+        wrapBodies.put(Edge.RIGHT, primaryBody.copy());
+        wrapBodies.put(Edge.LEFT, primaryBody.copy());
     }
 
     public boolean isActive() {
-        return true;
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
 
