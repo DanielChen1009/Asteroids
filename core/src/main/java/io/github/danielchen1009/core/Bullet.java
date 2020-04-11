@@ -6,9 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bullet extends Entity {
-    private static final double SPEED = 0.01;
-    private static final int LIFETIME = 60;
+    private static final double SPEED = 0.03;
+    private static final int LIFETIME = 20;
     private int lifetimeRemaining;
+    static int cooldown = 0;
 
     public Bullet(World world, Point center, double angle) {
         super("BULLET");
@@ -21,6 +22,7 @@ public class Bullet extends Entity {
         super.dx = SPEED * Math.cos(angle);
         super.dy = SPEED * Math.sin(angle);
         lifetimeRemaining = LIFETIME;
+
     }
 
     @Override

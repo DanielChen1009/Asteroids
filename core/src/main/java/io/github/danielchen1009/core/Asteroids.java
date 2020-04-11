@@ -31,7 +31,7 @@ public class Asteroids extends SceneGame {
             game.setTurningRight(event.down);
             break;
           case SPACE:
-            game.setFiring();
+            game.setFiring(event.down);
             break;
           default:
             break; // nada

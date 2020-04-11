@@ -18,6 +18,8 @@ public class Game implements ContactListener {
     private int cooldown;
     private Map<Body, Entity> bodyMap;
     private Stack<Contact> contacts;
+    private static final int COOLDOWN = 4;
+    private boolean isFiring;
 
     public Game() {
         contacts = new Stack<>();
@@ -30,6 +32,9 @@ public class Game implements ContactListener {
         this.ship = new Ship(world, startPoint);
         this.bodyMap = new HashMap<>();
         this.entities = new ArrayList<>();
+        this.isFiring = false;
+
+
         addEntity(this.ship);
         for (int i = 0; i < 10; ++i) {
             Random rand = new Random();
@@ -45,8 +50,27 @@ public class Game implements ContactListener {
             if (!entity.isActive()) {
                 itr.remove();
                 world.destroyBody(entity.primaryBody.getBody());
+                bodyMap.remove(entity.primaryBody.getBody());
+                for (EntityBody entityBody : entity.wrapBodies.values()) {
+                    bodyMap.remove(entityBody.getBody());
+                    world.destroyBody(entityBody.getBody());
+                }
+                System.out.println(world.getBodyCount());
             } else entity.update();
         }
+
+
+        if (isFiring) {
+            if (Bullet.cooldown == 0) {
+                Point bulletLoc = this.ship.primaryBody.getCenter().copy();
+                bulletLoc.add(ship.primaryBody.getPoints().get(0));
+                addEntity(new Bullet(world, bulletLoc, this.ship.bodyAngle));
+                Bullet.cooldown = COOLDOWN;
+            }
+        }
+        if (Bullet.cooldown > 0) Bullet.cooldown--;
+
+
         world.step(1f / 1000f, 10, 10);
         processContacts();
     }
@@ -60,9 +84,9 @@ public class Game implements ContactListener {
             if (entityA.type.equals(entityB.type)) continue;
             if (entityA instanceof Bullet && entityB instanceof Ship) continue;
             if (entityA instanceof Ship && entityB instanceof Bullet) continue;
-            entityA.setActive(false);
-            entityB.setActive(false);
-            System.out.println(entityA.type + "         " + entityB.type);
+            entityA.contact(entityB);
+            entityB.contact(entityA);
+            System.out.println("negro");
         }
     }
 
@@ -90,10 +114,8 @@ public class Game implements ContactListener {
         }
     }
 
-    public void setFiring() {
-        Point bulletLoc = this.ship.primaryBody.getCenter().copy();
-        bulletLoc.add(ship.primaryBody.getPoints().get(0));
-        addEntity(new Bullet(world, bulletLoc, this.ship.bodyAngle));
+    public void setFiring(boolean isFiring) {
+        this.isFiring = isFiring;
     }
 
     @Override
