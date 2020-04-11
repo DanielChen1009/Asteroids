@@ -147,7 +147,6 @@ public class Entity {
             if (!body.wrapped) {
                 body.wrap(edge);
                 body.wrapped = true;
-                System.out.println(edge);
             }
         }
 
@@ -164,7 +163,6 @@ public class Entity {
                         body.moveTo(wrapBody.getCenter(), wrapBody.getAngle());
                         body.wrapped = false;
                     }
-                    System.out.println("Nigger");
                     break;
                 }
             }
@@ -190,6 +188,7 @@ public class Entity {
     }
 
     public void setPrimaryBody(EntityBody primaryBody) {
+        wrapBodies.clear();
         this.primaryBody = primaryBody;
         wrapBodies.put(Edge.DOWN, primaryBody.copy());
         wrapBodies.put(Edge.UP, primaryBody.copy());
@@ -203,6 +202,10 @@ public class Entity {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public void contact(Entity other) {
+        this.active = false;
     }
 }
 
