@@ -1,0 +1,11 @@
+<module rename-to='asteroids'>
+    <inherits name='playn.Scene'/>
+    <inherits name="org.jbox2d.JBox2D" />
+
+    <source path='core'/>
+    <source path='html'/>
+
+    <public path="resources"/>
+
+    <entry-point class='net.danielchen.html.AsteroidsHtml'/>
+</module>

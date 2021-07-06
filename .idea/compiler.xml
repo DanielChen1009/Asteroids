@@ -6,10 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="asteroids-assets" />
-        <module name="asteroids-java" />
-        <module name="asteroids-core" />
         <module name="asteroids-html" />
+        <module name="asteroids-core" />
+        <module name="asteroids-java" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
