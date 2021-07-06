@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: io.playn:playn-jbox2d:sources:2.0.6">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/io/playn/playn-jbox2d/2.0.6/playn-jbox2d-2.0.6-sources.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/io/playn/playn-jbox2d/2.0.6/playn-jbox2d-2.0.6-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/io/playn/playn-jbox2d/2.0.6/playn-jbox2d-2.0.6-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

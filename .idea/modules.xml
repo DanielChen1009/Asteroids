@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Asteroids.iml" filepath="$PROJECT_DIR$/Asteroids.iml" />
-      <module fileurl="file://$PROJECT_DIR$/assets/asteroids-assets.iml" filepath="$PROJECT_DIR$/assets/asteroids-assets.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/asteroids-core.iml" filepath="$PROJECT_DIR$/core/asteroids-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/html/asteroids-html.iml" filepath="$PROJECT_DIR$/html/asteroids-html.iml" />
       <module fileurl="file://$PROJECT_DIR$/java/asteroids-java.iml" filepath="$PROJECT_DIR$/java/asteroids-java.iml" />

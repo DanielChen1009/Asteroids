@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.github.DanielChen1009</groupId>
+        <groupId>net.danielchen</groupId>
         <artifactId>asteroids</artifactId>
         <version>1.0</version>
     </parent>
@@ -14,22 +14,15 @@
     <name>Asteroids Java</name>
 
     <properties>
-        <mainClass>io.github.danielchen1009.java.AsteroidsJava</mainClass>
+        <mainClass>net.danielchen.java.AsteroidsJava</mainClass>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>io.github.DanielChen1009</groupId>
+            <groupId>net.danielchen</groupId>
             <artifactId>asteroids-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>io.github.DanielChen1009</groupId>
-            <artifactId>asteroids-assets</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>io.playn</groupId>
             <artifactId>playn-java-lwjgl</artifactId>
