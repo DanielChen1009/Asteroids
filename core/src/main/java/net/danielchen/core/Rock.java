@@ -13,16 +13,16 @@ public class Rock extends Entity {
     private double speed;
     private Random rand;
     private double sizeCo;
-    private World world;
+    private Game game;
 
-    public Rock(World world, Point center, double size) {
-        super("ROCK");
+    public Rock(Game game, Point center, double size) {
+        super("ROCK", game);
         this.center = center;
-        this.world = world;
+        this.game = game;
         this.size = size;
         this.sizeCo = 1;
         rand = new Random();
-        this.setPrimaryBody(this.createRock(world));
+        this.setPrimaryBody(this.createRock(game));
         this.speed = (rand.nextDouble() + 1) * 0.003;
         this.rotationSpeed = (rand.nextDouble() + 0.5) * Math.PI / 20;
         this.travelAngle = rand.nextFloat() * 2 * (float) Math.PI;
@@ -36,7 +36,7 @@ public class Rock extends Entity {
         super.update();
     }
 
-    public EntityBody createRock(World world) {
+    public EntityBody createRock(Game game) {
         List<Point> body = new ArrayList<>();
         int numPoints = rand.nextInt(4) + 5;
         double angle = 0;
@@ -49,18 +49,12 @@ public class Rock extends Entity {
             double y = Math.sin(angle) * radius;
             body.add(new Point(x, y));
         }
-        return new EntityBody(world, body, center);
+        return new EntityBody(this, game, body, center);
     }
 
     @Override
     public void contact(Entity other) {
-        sizeCo -= 0.25;
-        for (Point point : primaryBody.getPoints()) {
-            point.x *= sizeCo;
-            point.y *= sizeCo;
-        }
-        this.setPrimaryBody(new EntityBody(this.world, this.primaryBody.getPoints(), center));
+        if (other instanceof Rock) return;
+        super.contact(other);
     }
-
-
 }

@@ -19,25 +19,27 @@ enum Edge {
 }
 
 class EntityBody {
-    boolean wrapped;
-    private List<Point> model;
-    private List<Point> points;
+    private final List<Point> model;
+    private final List<Point> points;
+    private final Game game;
+    private final World world;
+    private final Body body;
+    private final Entity entity;
+
     private Point center;
-    private World world;
-    private Body body;
     private float angle;
 
-
-    public EntityBody(World world, List<Point> points, Point center) {
-        this.world = world;
+    public EntityBody(Entity entity, Game game, List<Point> points, Point center) {
+        this.entity = entity;
+        this.game = game;
+        this.world = game.world;
         this.model = points;
         this.points = new ArrayList<>();
-        for (Point point : model) {
+        for (Point point : this.model) {
             this.points.add(point.copy());
         }
         this.center = center;
         this.angle = 0;
-        this.wrapped = false;
 
         FixtureDef fixtureDef = new FixtureDef();
         BodyDef bodyDef = new BodyDef();
@@ -56,71 +58,75 @@ class EntityBody {
         fixtureDef.restitution = 1f;
         body.createFixture(fixtureDef);
         body.setTransform(new Vec2((float) center.x, (float) center.y), angle);
-    }
 
+        game.bodyMap.put(body, entity);
+    }
 
     void wrap(Edge edge) {
         Point p = this.center.copy();
         p.add(new Point(edge.dx, edge.dy));
-        moveTo(p, angle);
+        moveTo(p, this.angle);
     }
 
-    public Set<Edge> isOutOfBounds() {
+    public Set<Edge> getOutOfBounds() {
         Set<Edge> edges = new HashSet<>();
-        for (Point p : points) {
-            if (center.x + p.x > 1) edges.add(Edge.RIGHT);
-            if (center.x + p.x < 0) edges.add(Edge.LEFT);
-            if (center.y + p.y > 1) edges.add(Edge.DOWN);
-            if (center.y + p.y < 0) edges.add(Edge.UP);
+        for (Point p : this.points) {
+            if (this.center.x + p.x > 1) edges.add(Edge.RIGHT);
+            if (this.center.x + p.x < 0) edges.add(Edge.LEFT);
+            if (this.center.y + p.y > 1) edges.add(Edge.DOWN);
+            if (this.center.y + p.y < 0) edges.add(Edge.UP);
         }
         return edges;
     }
 
     EntityBody copy() {
-        return new EntityBody(world, new ArrayList<>(model), center.copy());
+        return new EntityBody(this.entity, this.game, new ArrayList<>(this.model), this.center.copy());
     }
 
     public List<Point> getPoints() {
-        return points;
+        return this.points;
     }
 
     public Point getCenter() {
-        return center;
+        return this.center;
     }
 
     void moveTo(Point point, float angle) {
-        center = point.copy();
+        this.center = point.copy();
         this.angle = angle;
-        for (int i = 0; i < model.size(); ++i) {
-            Point p = points.get(i);
-            Point modelP = model.get(i);
+        for (int i = 0; i < this.model.size(); ++i) {
+            Point p = this.points.get(i);
+            Point modelP = this.model.get(i);
             p.x = modelP.x * Math.cos(angle) - modelP.y * Math.sin(angle);
             p.y = modelP.y * Math.cos(angle) + modelP.x * Math.sin(angle);
         }
-        body.setTransform(new Vec2((float) center.x, (float) center.y), angle);
+        this.body.setTransform(new Vec2((float) this.center.x, (float) this.center.y), angle);
     }
 
     Body getBody() {
-        return body;
+        return this.body;
     }
 
     float getAngle() {
-        return angle;
+        return this.angle;
+    }
+
+    void destroy() {
+        this.game.bodyMap.remove(body);
+        this.world.destroyBody(body);
     }
 
     @Override
     public String toString() {
-        return center.toString();
+        return this.center.toString();
     }
-
-
 }
 
 public class Entity {
     public String type;
     // Relative to the center. x,y are normalized to [0, 1].
     protected EntityBody primaryBody;
-    protected Map<Edge, EntityBody> wrapBodies;
+    protected Map<Set<Edge>, EntityBody> wrapBodies;
 
     // traveling and orientation variables.
     protected double dx;
@@ -131,7 +137,10 @@ public class Entity {
 
     protected boolean active;
 
-    public Entity(String type) {
+    protected final Game game;
+
+    public Entity(String type, Game game) {
+        this.game = game;
         this.wrapBodies = new HashMap<>();
         this.active = true;
         this.type = type;
@@ -140,43 +149,67 @@ public class Entity {
     }
 
     public void update() {
-        // Wrap any bodies when primary body is out of bounds.
-        Set<Edge> outOfBounds = primaryBody.isOutOfBounds();
-        for (Edge edge : outOfBounds) {
-            EntityBody body = wrapBodies.get(edge);
-            if (!body.wrapped) {
-                body.wrap(edge);
-                body.wrapped = true;
-            }
-        }
+        this.createWrapBodies();
 
-        if (primaryBody.isOutOfBounds().isEmpty()) {
-            for (EntityBody body : wrapBodies.values()) {
-                body.moveTo(primaryBody.getCenter(), primaryBody.getAngle());
-                body.wrapped = false;
-            }
+        if (this.primaryBody.getOutOfBounds().isEmpty()) {
+            // The ship's primary body is fully in the window. Destroy all wrap bodies.
+            for (EntityBody body : this.wrapBodies.values()) body.destroy();
+            this.wrapBodies.clear();
         } else {
-            for (EntityBody wrapBody : wrapBodies.values()) {
-                if (wrapBody.isOutOfBounds().isEmpty()) {
-                    primaryBody.moveTo(wrapBody.getCenter(), wrapBody.getAngle());
-                    for (EntityBody body : wrapBodies.values()) {
-                        body.moveTo(wrapBody.getCenter(), wrapBody.getAngle());
-                        body.wrapped = false;
-                    }
+            if (this.wrapBodies.isEmpty()) throw new IllegalStateException("Expected wrap bodies");
+            for (EntityBody wrapBody : this.wrapBodies.values()) {
+                // If any wrap body is fully in the window, move the primary body there and
+                // destroy all wrap bodies.
+                if (wrapBody.getOutOfBounds().isEmpty()) {
+                    this.primaryBody.moveTo(wrapBody.getCenter(), wrapBody.getAngle());
+                    for (EntityBody body : this.wrapBodies.values()) body.destroy();
+                    this.wrapBodies.clear();
                     break;
                 }
             }
         }
 
-        // TODO: fix edge case where entity disappears
-        Point p = primaryBody.getCenter().copy();
-        p.add(new Point(dx, dy));
-        primaryBody.moveTo(p, bodyAngle);
-        for (EntityBody wrapBody : wrapBodies.values()) {
+        Point p = this.primaryBody.getCenter().copy();
+        p.add(new Point(this.dx, this.dy));
+        this.primaryBody.moveTo(p, this.bodyAngle);
+        for (EntityBody wrapBody : this.wrapBodies.values()) {
             Point p1 = wrapBody.getCenter().copy();
-            p1.add(new Point(dx, dy));
-            wrapBody.moveTo(p1, bodyAngle);
+            p1.add(new Point(this.dx, this.dy));
+            wrapBody.moveTo(p1, this.bodyAngle);
         }
+    }
+
+    private void createWrapBodies() {
+        // Create any wrap bodies when the primary body is out of bounds.
+        Set<Edge> outOfBounds = this.primaryBody.getOutOfBounds();
+        if (outOfBounds.size() > 2) {
+            throw new IllegalStateException("Cannot have more than 2 edges out of bounds.");
+        }
+        for (Edge edge : outOfBounds) {
+            Set<Edge> key = Collections.singleton(edge);
+            if (!this.wrapBodies.containsKey(key)) {
+                EntityBody body = this.primaryBody.copy();
+                body.wrap(edge);
+                this.wrapBodies.put(key, body);
+            }
+        }
+        if (outOfBounds.size() == 2) {
+            if (!this.wrapBodies.containsKey(outOfBounds)) {
+                EntityBody body = this.primaryBody.copy();
+                for (Edge edge : outOfBounds) body.wrap(edge);
+                this.wrapBodies.put(outOfBounds, body);
+            }
+        }
+    }
+
+    public void destroy() {
+        this.game.bodyMap.remove(this.primaryBody.getBody());
+        this.game.world.destroyBody(this.primaryBody.getBody());
+        for (EntityBody entityBody : this.wrapBodies.values()) {
+            this.game.bodyMap.remove(entityBody.getBody());
+            this.game.world.destroyBody(entityBody.getBody());
+        }
+        System.out.println("Removed " + this.type + ". Remaining bodies: " + game.world.getBodyCount());
     }
 
     public void rotateBody(double dTheta) {
@@ -188,24 +221,15 @@ public class Entity {
     }
 
     public void setPrimaryBody(EntityBody primaryBody) {
-        wrapBodies.clear();
         this.primaryBody = primaryBody;
-        wrapBodies.put(Edge.DOWN, primaryBody.copy());
-        wrapBodies.put(Edge.UP, primaryBody.copy());
-        wrapBodies.put(Edge.RIGHT, primaryBody.copy());
-        wrapBodies.put(Edge.LEFT, primaryBody.copy());
+        this.wrapBodies.clear();
     }
 
     public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
+        return this.active;
     }
 
     public void contact(Entity other) {
         this.active = false;
     }
 }
-

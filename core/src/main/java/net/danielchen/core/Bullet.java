@@ -11,18 +11,17 @@ public class Bullet extends Entity {
     private int lifetimeRemaining;
     static int cooldown = 0;
 
-    public Bullet(World world, Point center, double angle) {
-        super("BULLET");
+    public Bullet(Game game, Point center, double angle) {
+        super("BULLET", game);
         List<Point> primaryBody = new ArrayList<>();
         primaryBody.add(new Point(1.0 / 800, 0));
         primaryBody.add(new Point(-1.0 / 800, 0));
         primaryBody.add(new Point(0, 1.0 / 800));
         primaryBody.add(new Point(0, -1.0 / 800));
-        super.setPrimaryBody(new EntityBody(world, primaryBody, center));
+        super.setPrimaryBody(new EntityBody(this, game, primaryBody, center));
         super.dx = SPEED * Math.cos(angle);
         super.dy = SPEED * Math.sin(angle);
         lifetimeRemaining = LIFETIME;
-
     }
 
     @Override
@@ -30,5 +29,11 @@ public class Bullet extends Entity {
         lifetimeRemaining--;
         active = lifetimeRemaining >= 0;
         super.update();
+    }
+
+    @Override
+    public void contact(Entity other) {
+        if (other instanceof Bullet || other instanceof Ship) return;
+        super.contact(other);
     }
 }

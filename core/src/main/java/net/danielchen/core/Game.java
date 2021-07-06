@@ -11,15 +11,15 @@ import org.jbox2d.dynamics.contacts.Contact;
 import java.util.*;
 
 public class Game implements ContactListener {
-    private Ship ship;
+    private final Ship ship;
     // box2d object containing physics world
-    protected World world;
-    private List<Entity> entities;
-    private int cooldown;
-    private Map<Body, Entity> bodyMap;
-    private Stack<Contact> contacts;
+    World world;
+    private final List<Entity> entities;
+    private final Stack<Contact> contacts;
     private static final int COOLDOWN = 4;
     private boolean isFiring;
+
+    final Map<Body, Entity> bodyMap;
 
     public Game() {
         contacts = new Stack<>();
@@ -29,17 +29,16 @@ public class Game implements ContactListener {
         world.setContactListener(this);
 
         Point startPoint = new Point(0.5, 0.5);
-        this.ship = new Ship(world, startPoint);
         this.bodyMap = new HashMap<>();
         this.entities = new ArrayList<>();
         this.isFiring = false;
 
-
-        addEntity(this.ship);
-        for (int i = 0; i < 10; ++i) {
+        this.ship = new Ship(this, startPoint);
+        entities.add(this.ship);
+        for (int i = 0; i < 5; ++i) {
             Random rand = new Random();
             double x = rand.nextDouble();
-            addEntity(new Rock(world, new Point(x, 1), 0.1));
+            entities.add(new Rock(this, new Point(x, 1), 0.06));
         }
     }
 
@@ -48,30 +47,22 @@ public class Game implements ContactListener {
         while (itr.hasNext()) {
             Entity entity = itr.next();
             if (!entity.isActive()) {
+                entity.destroy();
                 itr.remove();
-                world.destroyBody(entity.primaryBody.getBody());
-                bodyMap.remove(entity.primaryBody.getBody());
-                for (EntityBody entityBody : entity.wrapBodies.values()) {
-                    bodyMap.remove(entityBody.getBody());
-                    world.destroyBody(entityBody.getBody());
-                }
-                System.out.println(world.getBodyCount());
             } else entity.update();
         }
-
 
         if (isFiring) {
             if (Bullet.cooldown == 0) {
                 Point bulletLoc = this.ship.primaryBody.getCenter().copy();
                 bulletLoc.add(ship.primaryBody.getPoints().get(0));
-                addEntity(new Bullet(world, bulletLoc, this.ship.bodyAngle));
+                entities.add(new Bullet(this, bulletLoc, this.ship.bodyAngle));
                 Bullet.cooldown = COOLDOWN;
             }
         }
         if (Bullet.cooldown > 0) Bullet.cooldown--;
 
-
-        world.step(1f / 1000f, 10, 10);
+        world.step(1f / 200f, 10, 10);
         processContacts();
     }
 
@@ -82,11 +73,9 @@ public class Game implements ContactListener {
             Entity entityB = bodyMap.get(contact.m_fixtureB.m_body);
             if (entityA == null || entityB == null) continue;
             if (entityA.type.equals(entityB.type)) continue;
-            if (entityA instanceof Bullet && entityB instanceof Ship) continue;
-            if (entityA instanceof Ship && entityB instanceof Bullet) continue;
             entityA.contact(entityB);
             entityB.contact(entityA);
-            System.out.println("negro");
+            System.out.println("Processed contact between " + entityA.type + " and " + entityB.type);
         }
     }
 
@@ -106,21 +95,13 @@ public class Game implements ContactListener {
         return new ArrayList<>(bodyMap.values());
     }
 
-    public void addEntity(Entity entity) {
-        entities.add(entity);
-        bodyMap.put(entity.primaryBody.getBody(), entity);
-        for (EntityBody entityBody : entity.wrapBodies.values()) {
-            bodyMap.put(entityBody.getBody(), entity);
-        }
-    }
-
     public void setFiring(boolean isFiring) {
         this.isFiring = isFiring;
     }
 
     @Override
     public void beginContact(Contact contact) {
-        contacts.push(contact);
+        if (contact.isEnabled() && contact.isTouching()) contacts.push(contact);
     }
 
     @Override
