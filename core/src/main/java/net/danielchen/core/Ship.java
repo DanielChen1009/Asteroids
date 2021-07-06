@@ -11,9 +11,9 @@ public class Ship extends Entity {
     double acceleration;
     boolean turningLeft, turningRight;
 
-    public Ship(World world, Point center) {
-        super("SHIP");
-        this.setPrimaryBody(new EntityBody(world, new ArrayList<>(Arrays.asList(
+    public Ship(Game game, Point center) {
+        super("SHIP", game);
+        this.setPrimaryBody(new EntityBody(this, game, new ArrayList<>(Arrays.asList(
                 new Point(4 * SIZE / 5, 0),
                 new Point(SIZE * Math.sin(4 * ANGLE), SIZE * Math.cos(4 * ANGLE)),
                 new Point(SIZE * Math.sin(-ANGLE), SIZE * Math.cos(-ANGLE)))), center));
@@ -40,4 +40,9 @@ public class Ship extends Entity {
         this.acceleration = a;
     }
 
+    @Override
+    public void contact(Entity other) {
+        if (other instanceof Bullet || other instanceof Ship) return;
+        super.contact(other);
+    }
 }

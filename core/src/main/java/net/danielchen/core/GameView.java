@@ -13,7 +13,6 @@ public class GameView extends Layer {
     public GameView(Game game, IDimension viewSize) {
         this.game = game;
         this.viewSize = viewSize;
-        float maxBoardSize = Math.min(viewSize.width(), viewSize.height());
     }
 
     // we want two extra pixels in width/height to account for the grid lines
@@ -30,7 +29,6 @@ public class GameView extends Layer {
     @Override
     protected void paintImpl(Surface surf) {
         surf.setFillColor(0xFF000000); // black with full alpha
-        float top = 0, bot = height(), left = 0, right = width();
         surf.fillRect(0, 0, width(), height());
         surf.setFillColor(0xFFFFFFFF);
         for (Entity entity : game.getEntities()) paintEntity(surf, entity);
@@ -39,7 +37,6 @@ public class GameView extends Layer {
     private void paintEntity(Surface surf, Entity entity) {
         paintBody(surf, entity.primaryBody);
         for (EntityBody wrapBody : entity.wrapBodies.values()) {
-            if (!wrapBody.wrapped) continue;
             paintBody(surf, wrapBody);
         }
     }
