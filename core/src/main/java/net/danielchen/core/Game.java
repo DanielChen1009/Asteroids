@@ -11,35 +11,49 @@ import org.jbox2d.dynamics.contacts.Contact;
 import java.util.*;
 
 public class Game implements ContactListener {
-    private final Ship ship;
-    // box2d object containing physics world
+    // The main player ship entity.
+    private Ship ship;
+    // Jbox2d object containing physics world for collision detection.
     World world;
     private final List<Entity> entities;
     private final Stack<Contact> contacts;
     private static final int COOLDOWN = 4;
     private boolean isFiring;
 
+    final Random rand;
     final Map<Body, Entity> bodyMap;
 
     public Game() {
-        contacts = new Stack<>();
-        world = new World(new Vec2(0, 0));
-        world.setWarmStarting(true);
-        world.setAutoClearForces(true);
-        world.setContactListener(this);
-
-        Point startPoint = new Point(0.5, 0.5);
+        this.rand = new Random();
+        this.contacts = new Stack<>();
         this.bodyMap = new HashMap<>();
         this.entities = new ArrayList<>();
-        this.isFiring = false;
 
+        restart();
+    }
+
+    public void restart() {
+        this.bodyMap.clear();
+        this.entities.clear();
+
+        this.world = new World(new Vec2(0, 0));
+        this.world.setWarmStarting(true);
+        this.world.setAutoClearForces(true);
+        this.world.setContactListener(this);
+
+        Point startPoint = new Point(0.5, 0.5);
+        this.isFiring = false;
         this.ship = new Ship(this, startPoint);
-        entities.add(this.ship);
+        this.addEntity(this.ship);
         for (int i = 0; i < 5; ++i) {
             Random rand = new Random();
             double x = rand.nextDouble();
-            entities.add(new Rock(this, new Point(x, 1), 0.06));
+            this.addEntity(new Rock(this, new Point(x, 1), (rand.nextFloat() + 0.5) * 0.06));
         }
+    }
+
+    public void addEntity(Entity entity) {
+        this.entities.add(entity);
     }
 
     public void update() {
@@ -52,17 +66,19 @@ public class Game implements ContactListener {
             } else entity.update();
         }
 
-        if (isFiring) {
-            if (Bullet.cooldown == 0) {
-                Point bulletLoc = this.ship.primaryBody.getCenter().copy();
-                bulletLoc.add(ship.primaryBody.getPoints().get(0));
-                entities.add(new Bullet(this, bulletLoc, this.ship.bodyAngle));
-                Bullet.cooldown = COOLDOWN;
+        if (this.ship.isActive()) {
+            if (isFiring) {
+                if (Bullet.cooldown == 0) {
+                    Point bulletLoc = this.ship.primaryBody.getCenter().copy();
+                    bulletLoc.add(ship.primaryBody.getPoints().get(0));
+                    this.addEntity(new Bullet(this, bulletLoc, this.ship.bodyAngle, Bullet.SPEED));
+                    Bullet.cooldown = COOLDOWN;
+                }
             }
+            if (Bullet.cooldown > 0) Bullet.cooldown--;
         }
-        if (Bullet.cooldown > 0) Bullet.cooldown--;
 
-        world.step(1f / 200f, 10, 10);
+        world.step(1f / 1000f, 10, 10);
         processContacts();
     }
 

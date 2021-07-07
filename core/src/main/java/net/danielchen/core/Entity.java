@@ -129,18 +129,23 @@ public class Entity {
     protected Map<Set<Edge>, EntityBody> wrapBodies;
 
     // traveling and orientation variables.
-    protected double dx;
-    protected double dy;
+    double dx;
+    double dy;
     // units of the angles are radians.
-    protected float travelAngle;
-    protected float bodyAngle;
+    float travelAngle;
+    float bodyAngle;
 
     protected boolean active;
 
+    // For this many game ticks, this entity cannot be destroyed.
+    protected int immortalTime = 5;
+
     protected final Game game;
+    protected final Random rand;
 
     public Entity(String type, Game game) {
         this.game = game;
+        this.rand = game.rand;
         this.wrapBodies = new HashMap<>();
         this.active = true;
         this.type = type;
@@ -149,6 +154,7 @@ public class Entity {
     }
 
     public void update() {
+        if (this.immortalTime > 0) --this.immortalTime;
         this.createWrapBodies();
 
         if (this.primaryBody.getOutOfBounds().isEmpty()) {
@@ -230,6 +236,7 @@ public class Entity {
     }
 
     public void contact(Entity other) {
+        if (this.immortalTime > 0) return;
         this.active = false;
     }
 }
