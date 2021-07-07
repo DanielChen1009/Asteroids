@@ -1,7 +1,5 @@
 package net.danielchen.core;
 
-import org.jbox2d.dynamics.World;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -44,5 +42,12 @@ public class Ship extends Entity {
     public void contact(Entity other) {
         if (other instanceof Bullet || other instanceof Ship) return;
         super.contact(other);
+        // When the ship dies, do a radial burst of bullets for special effect.
+        int numBullets = this.rand.nextInt(20) + 20;
+        for (int i = 0; i < numBullets; i++) {
+            this.game.addEntity(new Bullet(this.game, this.primaryBody.getCenter().copy(),
+                    i * ((this.rand.nextDouble() + 1) * Math.PI / numBullets),
+                    Bullet.SPEED * this.rand.nextDouble()));
+        }
     }
 }
