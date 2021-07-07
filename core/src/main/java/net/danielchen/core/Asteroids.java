@@ -1,7 +1,6 @@
 package net.danielchen.core;
 
 import playn.core.*;
-import playn.scene.ImageLayer;
 import playn.scene.Layer;
 import playn.scene.SceneGame;
 import pythagoras.f.IDimension;
@@ -9,7 +8,6 @@ import pythagoras.f.IDimension;
 public class Asteroids extends SceneGame {
     private final Game game;
     private final Platform plat;
-    private Canvas canvas;
 
     public Asteroids(Platform plat) {
         super(plat, 50); // update our "simulation" 50ms (20 times per second)
@@ -53,6 +51,6 @@ public class Asteroids extends SceneGame {
     @Override
     public void update(Clock clock) {
         super.update(clock);
-        game.update();
+        this.game.update();
     }
 }

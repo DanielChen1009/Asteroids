@@ -1,6 +1,5 @@
 package net.danielchen.core;
 
-
 import playn.core.*;
 import playn.scene.GroupLayer;
 import playn.scene.ImageLayer;
@@ -16,7 +15,7 @@ public class GameView extends GroupLayer {
         this.game = game;
         this.plat = plat;
         this.addAt(new GameLayer(game, plat), 0, 0);
-        this.addAt(this.createTextLayer("Press ESC to restart"), 0 ,0);
+        this.addAt(this.createTextLayer("Press ESC to restart"), 0, 0);
     }
 
     static class GameLayer extends Layer {
@@ -44,7 +43,7 @@ public class GameView extends GroupLayer {
             surf.setFillColor(0xFF000000); // black with full alpha
             surf.fillRect(0, 0, width(), height());
             surf.setFillColor(0xFFFFFFFF);
-            for (Entity entity : game.getEntities()) paintEntity(surf, entity);
+            for (Entity entity : this.game.getEntities()) paintEntity(surf, entity);
         }
 
         private void paintEntity(Surface surf, Entity entity) {
