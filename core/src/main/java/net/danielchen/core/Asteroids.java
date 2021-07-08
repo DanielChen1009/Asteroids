@@ -7,15 +7,13 @@ import pythagoras.f.IDimension;
 
 public class Asteroids extends SceneGame {
     private final Game game;
-    private final Platform plat;
 
     public Asteroids(Platform plat) {
         super(plat, 50); // update our "simulation" 50ms (20 times per second)
         // figure out how big the game view is
         final IDimension size = plat.graphics().viewSize;
         this.game = new Game();
-        this.plat = plat;
-        this.plat.input().keyboardEvents.connect(new Keyboard.KeySlot() {
+        plat.input().keyboardEvents.connect(new Keyboard.KeySlot() {
             @Override
             public void onEmit(Keyboard.KeyEvent event) {
                 switch (event.key) {
@@ -45,7 +43,7 @@ public class Asteroids extends SceneGame {
         });
 
         // Creates and add a game view for asteroids objects.
-        this.rootLayer.addAt(new GameView(this.game, this.plat), 0, 0);
+        this.rootLayer.addAt(new GameView(this.game, plat), 0, 0);
     }
 
     @Override

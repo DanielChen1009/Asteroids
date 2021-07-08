@@ -215,7 +215,6 @@ public class Entity {
             this.game.bodyMap.remove(entityBody.getBody());
             this.game.world.destroyBody(entityBody.getBody());
         }
-        System.out.println("Removed " + this.type + ". Remaining bodies: " + game.world.getBodyCount());
     }
 
     public void rotateBody(double dTheta) {

@@ -22,6 +22,7 @@ public class Game implements ContactListener {
 
     final Random rand;
     final Map<Body, Entity> bodyMap;
+    int score;
 
     public Game() {
         this.rand = new Random();
@@ -33,6 +34,7 @@ public class Game implements ContactListener {
     }
 
     public void restart() {
+        this.score = 0;
         this.bodyMap.clear();
         this.entities.clear();
 
@@ -45,11 +47,6 @@ public class Game implements ContactListener {
         this.isFiring = false;
         this.ship = new Ship(this, startPoint);
         this.addEntity(this.ship);
-        for (int i = 0; i < 5; ++i) {
-            Random rand = new Random();
-            double x = rand.nextDouble();
-            this.addEntity(new Rock(this, new Point(x, 1), (rand.nextFloat() + 0.5) * 0.06));
-        }
     }
 
     public void addEntity(Entity entity) {
@@ -57,6 +54,13 @@ public class Game implements ContactListener {
     }
 
     public void update() {
+        while (this.world.getBodyCount() < this.score * 0.1 + 5) {
+            Rock rock = new Rock(this,
+                    new Point(this.rand.nextDouble(), 1), this.rand.nextGaussian() * 0.01 + 0.06);
+            rock.travelAngle = (float) Math.atan2(rock.primaryBody.getCenter().y - this.ship.primaryBody.getCenter().y,
+                    rock.primaryBody.getCenter().x - this.ship.primaryBody.getCenter().x);
+            this.addEntity(rock);
+        }
         Iterator<Entity> itr = entities.iterator();
         while (itr.hasNext()) {
             Entity entity = itr.next();
@@ -88,10 +92,8 @@ public class Game implements ContactListener {
             Entity entityA = bodyMap.get(contact.m_fixtureA.m_body);
             Entity entityB = bodyMap.get(contact.m_fixtureB.m_body);
             if (entityA == null || entityB == null) continue;
-            if (entityA.type.equals(entityB.type)) continue;
             entityA.contact(entityB);
             entityB.contact(entityA);
-            System.out.println("Processed contact between " + entityA.type + " and " + entityB.type);
         }
     }
 
@@ -108,30 +110,31 @@ public class Game implements ContactListener {
     }
 
     public List<Entity> getEntities() {
-        return new ArrayList<>(bodyMap.values());
+        return new ArrayList<>(this.bodyMap.values());
     }
 
     public void setFiring(boolean isFiring) {
         this.isFiring = isFiring;
     }
 
+    public int score() {
+        return this.score;
+    }
+
     @Override
     public void beginContact(Contact contact) {
-        if (contact.isEnabled() && contact.isTouching()) contacts.push(contact);
     }
 
     @Override
     public void endContact(Contact contact) {
-
     }
 
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
-
     }
 
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
-
+        if (contact.isEnabled() && contact.isTouching()) contacts.push(contact);
     }
 }

@@ -9,8 +9,10 @@ import java.util.Random;
 public class Rock extends Entity {
     private final Point center;
     private final double size;
-    private final double rotationSpeed;
-    private final double speed;
+    private double rotationSpeed;
+    private double speed;
+    private int lifetime = Integer.MAX_VALUE;
+    boolean isDebris = false;
 
     public Rock(Game game, Point center, double size) {
         super("ROCK", game);
@@ -19,16 +21,18 @@ public class Rock extends Entity {
         this.setPrimaryBody(this.createRock(game));
         this.speed = (this.rand.nextDouble() + 1) * 0.003;
         this.rotationSpeed = (this.rand.nextDouble() + 0.5) * Math.PI / 20;
-        this.travelAngle = this.rand.nextFloat() * 2 * (float) Math.PI;
+        this.travelAngle = (float) (this.rand.nextGaussian() * 2.0 * Math.PI);
     }
 
     public Rock(Rock parent, Entity collider, double angle) {
         super("ROCK", parent.game);
+        this.size = parent.size * (this.rand.nextDouble() + 0.5) * 0.5;
         this.center = parent.primaryBody.getCenter().copy();
-        this.size = parent.size * 0.5;
+        this.center.x = this.center.x + 0.5 * this.rand.nextGaussian() * (parent.size + this.size);
+        this.center.y = this.center.y + 0.5 * this.rand.nextGaussian() * (parent.size + this.size);
         this.setPrimaryBody(this.createRock(game));
-        this.speed = parent.speed * 0.8;
-        this.rotationSpeed = parent.rotationSpeed * 0.8;
+        this.speed = parent.speed * (this.rand.nextGaussian() * 0.1 + 0.8);
+        this.rotationSpeed = parent.rotationSpeed * (this.rand.nextGaussian() * 0.1 + 0.8);
         this.travelAngle = collider.travelAngle + (float) angle;
     }
 
@@ -38,6 +42,8 @@ public class Rock extends Entity {
         dy = speed * Math.sin(travelAngle);
         this.rotateBody(rotationSpeed);
         super.update();
+        if (this.lifetime > 0 && this.lifetime != Integer.MAX_VALUE) this.lifetime--;
+        if (this.lifetime <= 0) this.active = false;
     }
 
     /**
@@ -61,13 +67,48 @@ public class Rock extends Entity {
 
     @Override
     public void contact(Entity other) {
-        if (other instanceof Rock || this.immortalTime > 0) return;
-        super.contact(other);
+        if (this.immortalTime > 0 || this.isDebris) return;
+
+        // Handle collisions with other rocks to simulate bouncing-off effect.
+        if (other instanceof Rock) {
+            Rock otherRock = (Rock) other;
+            if (otherRock.isDebris) return;
+            Point p1 = this.primaryBody.getCenter();
+            Point p2 = other.primaryBody.getCenter();
+            double dy = p1.y - p2.y + this.rand.nextGaussian() * 0.0005;
+            double dx = p1.x - p2.x + this.rand.nextGaussian() * 0.0005;
+            this.travelAngle = (float) Math.atan2(dy, dx);
+            other.travelAngle = this.travelAngle + (float) Math.PI;
+            double avgSpeed = (this.speed + otherRock.speed) * 0.5;
+            this.speed = avgSpeed;
+            otherRock.speed = avgSpeed;
+            double avgRotSpeed = (this.rotationSpeed + otherRock.rotationSpeed) * 0.5;
+            this.rotationSpeed = avgRotSpeed;
+            otherRock.rotationSpeed = avgRotSpeed;
+            return;
+        }
+
+        // Spawn some debris to simulate explosion.
+        int numDebris = this.rand.nextInt(5) + 5;
+        for (int i = 0; i < numDebris; i++) {
+            Rock debris = new Rock(this.game, this.primaryBody.getCenter().copy(), this.size * 0.1);
+            debris.lifetime = 5 + (int) (this.rand.nextGaussian() * 2);
+            debris.speed = 0.02 + this.rand.nextGaussian() * 0.01;
+            debris.isDebris = true;
+            this.game.addEntity(debris);
+        }
+
+        // Spawn some smaller rocks to simulate breaking up the bigger rock.
         if (this.size > 0.03) {
             int numChildren = this.rand.nextInt(3) + 2;
             for (int i = 0; i < numChildren; i++) {
-                this.game.addEntity(new Rock(this, other, (rand.nextFloat() - 0.5f) * Math.PI * 0.5 * i));
+                Rock child = new Rock(this, other, this.rand.nextGaussian() * Math.PI * 0.5 * i);
+                this.game.addEntity(child);
             }
         }
+
+        // This destroys the current rock.
+        this.game.score += this.size * 100;
+        super.contact(other);
     }
 }
