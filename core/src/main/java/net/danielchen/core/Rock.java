@@ -1,10 +1,7 @@
 package net.danielchen.core;
 
-import org.jbox2d.dynamics.World;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Rock extends Entity {
     private final Point center;
@@ -66,8 +63,17 @@ public class Rock extends Entity {
     }
 
     @Override
+    public int getContactDelay(Entity other) {
+        if (other instanceof Rock) return 2;
+        if (other instanceof Ship) return 3;
+        return super.getContactDelay(other);
+    }
+
+    @Override
     public void contact(Entity other) {
         if (this.immortalTime > 0 || this.isDebris) return;
+
+        if (other instanceof Ammo) return;
 
         // Handle collisions with other rocks to simulate bouncing-off effect.
         if (other instanceof Rock) {
@@ -105,6 +111,11 @@ public class Rock extends Entity {
                 Rock child = new Rock(this, other, this.rand.nextGaussian() * Math.PI * 0.5 * i);
                 this.game.addEntity(child);
             }
+        }
+
+        // Chance to drop ammo for the player.
+        if (this.rand.nextDouble() < 0.3) {
+            this.game.addEntity(new Ammo(this.game, this.primaryBody.getCenter().copy()));
         }
 
         // This destroys the current rock.

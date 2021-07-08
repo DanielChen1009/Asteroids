@@ -8,6 +8,7 @@ public class Ship extends Entity {
     private static final double ANGLE = Math.PI / 3;
     double acceleration;
     boolean turningLeft, turningRight;
+    int ammo = 30;
 
     public Ship(Game game, Point center) {
         super("SHIP", game);
@@ -42,6 +43,12 @@ public class Ship extends Entity {
     public void contact(Entity other) {
         if (other instanceof Bullet || other instanceof Ship) return;
         if (other instanceof Rock && ((Rock) other).isDebris) return;
+
+        if (other instanceof Ammo) {
+            other.active = false;
+            this.ammo += 10;
+            return;
+        }
         super.contact(other);
         // When the ship dies, do a radial burst of bullets for special effect.
         int numBullets = this.rand.nextInt(20) + 20;

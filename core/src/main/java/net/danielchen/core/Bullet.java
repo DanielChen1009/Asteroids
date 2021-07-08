@@ -18,16 +18,16 @@ public class Bullet extends Entity {
         primaryBody.add(new Point(-1.0 / 800, 0));
         primaryBody.add(new Point(0, 1.0 / 800));
         primaryBody.add(new Point(0, -1.0 / 800));
-        super.setPrimaryBody(new EntityBody(this, game, primaryBody, center));
-        super.dx = speed * Math.cos(angle);
-        super.dy = speed * Math.sin(angle);
+        this.setPrimaryBody(new EntityBody(this, game, primaryBody, center));
+        this.dx = speed * Math.cos(angle);
+        this.dy = speed * Math.sin(angle);
         this.lifetimeRemaining = LIFETIME;
     }
 
     @Override
     public void update() {
-        lifetimeRemaining--;
-        active = lifetimeRemaining >= 0;
+        if (lifetimeRemaining > 0) lifetimeRemaining--;
+        else active = false;
         super.update();
     }
 

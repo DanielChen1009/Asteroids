@@ -238,4 +238,8 @@ public class Entity {
         if (this.immortalTime > 0) return;
         this.active = false;
     }
+
+    public int getContactDelay(Entity other) {
+        return 0;
+    }
 }

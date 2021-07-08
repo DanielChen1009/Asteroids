@@ -12,11 +12,11 @@ import java.util.*;
 
 public class Game implements ContactListener {
     // The main player ship entity.
-    private Ship ship;
+    Ship ship;
     // Jbox2d object containing physics world for collision detection.
     World world;
     private final List<Entity> entities;
-    private final Stack<Contact> contacts;
+    private final Map<Pair<Entity, Entity>, ContactData> contacts;
     private static final int COOLDOWN = 4;
     private boolean isFiring;
 
@@ -26,7 +26,7 @@ public class Game implements ContactListener {
 
     public Game() {
         this.rand = new Random();
-        this.contacts = new Stack<>();
+        this.contacts = new HashMap<>();
         this.bodyMap = new HashMap<>();
         this.entities = new ArrayList<>();
 
@@ -74,14 +74,13 @@ public class Game implements ContactListener {
         }
 
         // Manage ship firing logic.
-        if (this.ship.isActive()) {
-            if (isFiring) {
-                if (Bullet.cooldown == 0) {
-                    Point bulletLoc = this.ship.primaryBody.getCenter().copy();
-                    bulletLoc.add(ship.primaryBody.getPoints().get(0));
-                    this.addEntity(new Bullet(this, bulletLoc, this.ship.bodyAngle, Bullet.SPEED));
-                    Bullet.cooldown = COOLDOWN;
-                }
+        if (this.ship.isActive() && this.ship.ammo > 0) {
+            if (isFiring && Bullet.cooldown == 0) {
+                Point bulletLoc = this.ship.primaryBody.getCenter().copy();
+                bulletLoc.add(ship.primaryBody.getPoints().get(0));
+                this.addEntity(new Bullet(this, bulletLoc, this.ship.bodyAngle, Bullet.SPEED));
+                Bullet.cooldown = COOLDOWN;
+                this.ship.ammo--;
             }
             if (Bullet.cooldown > 0) Bullet.cooldown--;
         }
@@ -90,14 +89,27 @@ public class Game implements ContactListener {
         processContacts();
     }
 
+    static class ContactData {
+        Contact contact;
+        int delay;
+
+        public ContactData(Contact contact, int delay) {
+            this.contact = contact;
+            this.delay = delay;
+        }
+    }
+
     public void processContacts() {
-        while (!this.contacts.empty()) {
-            Contact contact = contacts.pop();
-            Entity entityA = bodyMap.get(contact.m_fixtureA.m_body);
-            Entity entityB = bodyMap.get(contact.m_fixtureB.m_body);
-            if (entityA == null || entityB == null) continue;
-            entityA.contact(entityB);
-            entityB.contact(entityA);
+        Iterator<Map.Entry<Pair<Entity, Entity>, ContactData>> iterator = this.contacts.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Pair<Entity, Entity>, ContactData> entry = iterator.next();
+            if (entry.getValue().delay > 0) {
+                entry.getValue().delay--;
+                continue;
+            }
+            entry.getKey().val0.contact(entry.getKey().val1);
+            entry.getKey().val1.contact(entry.getKey().val0);
+            iterator.remove();
         }
     }
 
@@ -126,7 +138,16 @@ public class Game implements ContactListener {
     }
 
     @Override
-    public void beginContact(Contact contact) {}
+    public void beginContact(Contact contact) {
+        if (contact.isEnabled() && contact.isTouching()) {
+            Entity entityA = bodyMap.get(contact.m_fixtureA.m_body);
+            Entity entityB = bodyMap.get(contact.m_fixtureB.m_body);
+            if (entityA == null || entityB == null) return;
+            if (contacts.containsKey(new Pair<>(entityA, entityB))) return;
+            int contactDelay = entityA.getContactDelay(entityB) + entityB.getContactDelay(entityA);
+            contacts.put(new Pair<>(entityA, entityB), new ContactData(contact, contactDelay));
+        }
+    }
 
     @Override
     public void endContact(Contact contact) {}
@@ -135,7 +156,5 @@ public class Game implements ContactListener {
     public void preSolve(Contact contact, Manifold oldManifold) {}
 
     @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {
-        if (contact.isEnabled() && contact.isTouching()) contacts.push(contact);
-    }
+    public void postSolve(Contact contact, ContactImpulse impulse) {}
 }
