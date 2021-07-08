@@ -17,7 +17,7 @@ public class Game implements ContactListener {
     World world;
     private final List<Entity> entities;
     private final Stack<Contact> contacts;
-    private static final int COOLDOWN = 4;
+    private static final int COOLDOWN = 5;
     private boolean isFiring;
 
     final Random rand;
@@ -39,8 +39,6 @@ public class Game implements ContactListener {
         this.entities.clear();
 
         this.world = new World(new Vec2(0, 0));
-        this.world.setWarmStarting(true);
-        this.world.setAutoClearForces(true);
         this.world.setContactListener(this);
 
         Point startPoint = new Point(0.5, 0.5);
@@ -55,10 +53,11 @@ public class Game implements ContactListener {
 
     public void update() {
         // Continuously spawn rocks, raising the limit as the score goes up.
-        while (this.world.getBodyCount() < this.score * 0.1 + 5) {
+        while (this.world.getBodyCount() < this.score * 0.1 + 6) {
             Rock rock = new Rock(this,
                     new Point(this.rand.nextDouble(), 1), this.rand.nextGaussian() * 0.01 + 0.06);
-            rock.travelAngle = (float) Math.atan2(rock.primaryBody.getCenter().y - this.ship.primaryBody.getCenter().y,
+            rock.travelAngle = (float) Math.atan2(
+                    rock.primaryBody.getCenter().y - this.ship.primaryBody.getCenter().y,
                     rock.primaryBody.getCenter().x - this.ship.primaryBody.getCenter().x);
             this.addEntity(rock);
         }

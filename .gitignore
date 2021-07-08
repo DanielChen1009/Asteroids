@@ -1,2 +1,5 @@
 **/out
 **/target
+.DS_Store
+.idea/.name
+.idea/shelf/
