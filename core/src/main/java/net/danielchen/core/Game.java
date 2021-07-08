@@ -54,6 +54,7 @@ public class Game implements ContactListener {
     }
 
     public void update() {
+        // Continuously spawn rocks, raising the limit as the score goes up.
         while (this.world.getBodyCount() < this.score * 0.1 + 5) {
             Rock rock = new Rock(this,
                     new Point(this.rand.nextDouble(), 1), this.rand.nextGaussian() * 0.01 + 0.06);
@@ -61,6 +62,8 @@ public class Game implements ContactListener {
                     rock.primaryBody.getCenter().x - this.ship.primaryBody.getCenter().x);
             this.addEntity(rock);
         }
+
+        // Delete inactive entities.
         Iterator<Entity> itr = entities.iterator();
         while (itr.hasNext()) {
             Entity entity = itr.next();
@@ -70,6 +73,7 @@ public class Game implements ContactListener {
             } else entity.update();
         }
 
+        // Manage ship firing logic.
         if (this.ship.isActive()) {
             if (isFiring) {
                 if (Bullet.cooldown == 0) {
@@ -122,16 +126,13 @@ public class Game implements ContactListener {
     }
 
     @Override
-    public void beginContact(Contact contact) {
-    }
+    public void beginContact(Contact contact) {}
 
     @Override
-    public void endContact(Contact contact) {
-    }
+    public void endContact(Contact contact) {}
 
     @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {
-    }
+    public void preSolve(Contact contact, Manifold oldManifold) {}
 
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
