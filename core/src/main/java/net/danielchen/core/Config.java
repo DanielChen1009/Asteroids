@@ -28,7 +28,10 @@ public class Config {
     public static double SHIP_ACCELERATION = 0.0003;
 
     // The amount of ammo the player starts with.
-    public static int INITIAL_AMMO = 30;
+    public static int INITIAL_AMMO = 50;
+
+    // The amount of additional ammo the player gets through powerup.
+    public static int POWERUP_AMMO_INCREASE = 20;
 
     // The firing cooldown for the main gun, in # frames.
     public static int COOLDOWN = 4;
@@ -57,7 +60,7 @@ public class Config {
 
     // The distance at which the powerup starts getting attracted towards the
     // player ship.
-    public static double POWERUP_ATTRACT_DISTANCE = 0.01;
+    public static double POWERUP_ATTRACT_DISTANCE = 0.15;
 
     /**
      * Physics related config.
@@ -73,19 +76,19 @@ public class Config {
      * Entity generation related config.
      */
     // The higher this number is, the more rocks/stuff will spawn over time.
-    public static double SPAWN_RATE = 0.1;
+    public static double SPAWN_RATE = 0.05;
 
     // The higher this number is, the more ammo powerup will spawn.
-    public static double AMMO_SPAWN_RATE = 3.0;
+    public static double AMMO_SPAWN_RATE = 2.0;
 
     // The higher this number is, the more invincible powerup will spawn.
-    public static double INVINCIBLE_SPAWN_RATE = 0.7;
+    public static double INVINCIBLE_SPAWN_RATE = 0.5;
 
     // The higher this number is, the more megagun powerup will spawn.
-    public static double MEGAGUN_SPAWN_RATE = 0.6;
+    public static double MEGAGUN_SPAWN_RATE = 0.2;
 
     // The average rock size that is randomly generated.
-    public static double BASE_ROCK_SIZE = 0.06;
+    public static double BASE_ROCK_SIZE = 0.05;
 
     // The average rock speed that is randomly generated.
     public static double BASE_ROCK_SPEED = 0.003;

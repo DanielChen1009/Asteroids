@@ -8,7 +8,9 @@ import java.util.List;
 public class Powerup extends Entity {
     // The type of this powerup with associated powerup-specific parameters.
     enum Type {
-        AMMO(0xFF2288AA, 20, "+10 ammo", false, Config.AMMO_SPAWN_RATE),
+        AMMO(0xFF2288AA, 20, "+" + Config.POWERUP_AMMO_INCREASE + " ammo",
+                false,
+                Config.AMMO_SPAWN_RATE),
         INVINCIBLE(0xFFFFFF00, 200, "invincible", true,
                 Config.INVINCIBLE_SPAWN_RATE),
         MEGAGUN(0xFFFF2222, 200, "megagun", true, Config.MEGAGUN_SPAWN_RATE);
@@ -65,7 +67,7 @@ public class Powerup extends Entity {
         Point p2 = this.game.ship.primaryBody.getCenter();
         if (this.game.ship.isActive() &&
                 p1.distance(p2) < Config.POWERUP_ATTRACT_DISTANCE) {
-            double v = this.rand.nextGaussian() * 0.002 + 0.01;
+            double v = this.rand.nextGaussian() * 0.003 + 0.02;
             this.dx += v * (p2.x - p1.x);
             this.dy += v * (p2.y - p1.y);
         } else {

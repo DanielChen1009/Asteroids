@@ -77,7 +77,7 @@ public class Ship extends Entity {
             Powerup powerup = (Powerup) other;
             powerup.active = false;
             if (powerup.type == Type.AMMO)
-                this.ammo += 10;
+                this.ammo += Config.POWERUP_AMMO_INCREASE;
             if (!this.powerups.containsKey(powerup.type)) {
                 this.powerups.put(powerup.type, powerup.type.time);
             } else {

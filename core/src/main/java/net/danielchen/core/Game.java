@@ -22,6 +22,7 @@ public class Game implements ContactListener {
     final Random rand;
     final Map<Body, Entity> bodyMap;
     int score;
+    int numRocks;
 
     public Game() {
         this.rand = new Random();
@@ -34,6 +35,7 @@ public class Game implements ContactListener {
 
     public void restart() {
         this.score = 0;
+        this.numRocks = 0;
         this.bodyMap.clear();
         this.entities.clear();
 
@@ -60,7 +62,7 @@ public class Game implements ContactListener {
 
     public void update() {
         // Continuously spawn rocks, raising the limit as the score goes up.
-        while (this.world.getBodyCount() < this.score * Config.SPAWN_RATE + 5) {
+        while (this.numRocks < this.score * Config.SPAWN_RATE + 2) {
             Point point = this.rand.nextDouble() < 0.5 ? new Point(
                     this.rand.nextDouble(), 1) : new Point(1,
                     this.rand.nextDouble());
@@ -68,12 +70,16 @@ public class Game implements ContactListener {
                     this.rand.nextGaussian() * Config.BASE_ROCK_SIZE / 10 +
                             Config.BASE_ROCK_SIZE);
             this.addEntity(rock);
+            this.numRocks++;
         }
 
         // Delete inactive entities.
         Iterator<Entity> itr = this.entities.iterator();
+        this.numRocks = 0;
         while (itr.hasNext()) {
             Entity entity = itr.next();
+            if (entity instanceof Rock && !((Rock) entity).isDebris)
+                this.numRocks++;
             if (!entity.isActive()) {
                 entity.destroy();
                 itr.remove();
