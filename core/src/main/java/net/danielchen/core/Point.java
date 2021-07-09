@@ -20,11 +20,11 @@ class Point {
     }
 
     public Point copy() {
-        return new Point(x, y);
+        return new Point(this.x, this.y);
     }
 
     @Override
     public String toString() {
-        return x + ", " + y;
+        return this.x + ", " + this.y;
     }
 }

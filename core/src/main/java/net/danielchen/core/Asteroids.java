@@ -1,6 +1,9 @@
 package net.danielchen.core;
 
-import playn.core.*;
+import playn.core.Clock;
+import playn.core.Keyboard;
+import playn.core.Platform;
+import playn.core.Surface;
 import playn.scene.Layer;
 import playn.scene.SceneGame;
 import pythagoras.f.IDimension;
@@ -18,27 +21,30 @@ public class Asteroids extends SceneGame {
             public void onEmit(Keyboard.KeyEvent event) {
                 switch (event.key) {
                     case LEFT:
-                        game.setTurningLeft(event.down);
+                        Asteroids.this.game.setTurningLeft(event.down);
                         break;
                     case UP:
-                        game.setAccelerating(event.down);
+                        Asteroids.this.game.setAccelerating(event.down);
                         break;
                     case RIGHT:
-                        game.setTurningRight(event.down);
+                        Asteroids.this.game.setTurningRight(event.down);
                         break;
                     case SPACE:
-                        game.setFiring(event.down);
+                        Asteroids.this.game.setFiring(event.down);
                         break;
                     case ESCAPE:
-                        if (!event.down) game.restart();
+                        if (!event.down)
+                            Asteroids.this.game.restart();
                         break;
                 }
             }
         });
         // Creates a layer that just draws a black background.
         this.rootLayer.add(new Layer() {
+            @Override
             protected void paintImpl(Surface surf) {
-                surf.setFillColor(0xFFFFFFFF).fillRect(0, 0, size.width(), size.height());
+                surf.setFillColor(0xFFFFFFFF)
+                        .fillRect(0, 0, size.width(), size.height());
             }
         });
 

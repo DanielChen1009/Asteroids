@@ -17,7 +17,6 @@ public class Game implements ContactListener {
     World world;
     private final List<Entity> entities;
     private final Map<Pair<Body, Body>, ContactData> contacts;
-    private static final int COOLDOWN = 4;
     private boolean isFiring;
 
     final Random rand;
@@ -30,7 +29,7 @@ public class Game implements ContactListener {
         this.bodyMap = new HashMap<>();
         this.entities = new ArrayList<>();
 
-        restart();
+        this.restart();
     }
 
     public void restart() {
@@ -55,42 +54,53 @@ public class Game implements ContactListener {
 
     public void update() {
         // Continuously spawn rocks, raising the limit as the score goes up.
-        while (this.world.getBodyCount() < this.score * 0.1 + 5) {
-            Point point = this.rand.nextDouble() < 0.5 ? new Point(this.rand.nextDouble(), 1) : new Point(1, this.rand.nextDouble());
-            Rock rock = new Rock(this, point, this.rand.nextGaussian() * 0.01 + 0.06);
+        while (this.world.getBodyCount() < this.score * Config.SPAWN_RATE + 5) {
+            Point point = this.rand.nextDouble() < 0.5 ? new Point(
+                    this.rand.nextDouble(), 1) : new Point(1,
+                    this.rand.nextDouble());
+            Rock rock = new Rock(this, point,
+                    this.rand.nextGaussian() * Config.BASE_ROCK_SIZE / 10 +
+                            Config.BASE_ROCK_SIZE);
             this.addEntity(rock);
         }
 
         // Delete inactive entities.
-        Iterator<Entity> itr = entities.iterator();
+        Iterator<Entity> itr = this.entities.iterator();
         while (itr.hasNext()) {
             Entity entity = itr.next();
             if (!entity.isActive()) {
                 entity.destroy();
                 itr.remove();
-            } else entity.update();
+            } else
+                entity.update();
         }
 
         // Manage ship firing logic.
         if (this.ship.isActive() && this.ship.ammo > 0) {
-            if (isFiring && Bullet.cooldown == 0) {
+            if (this.isFiring && Bullet.cooldown == 0) {
                 Point bulletLoc = this.ship.primaryBody.getCenter().copy();
-                bulletLoc.add(ship.primaryBody.getPoints().get(0));
-                this.addEntity(new Bullet(this, bulletLoc, this.ship.bodyAngle, Bullet.SPEED));
-                Bullet.cooldown = COOLDOWN;
+                bulletLoc.add(this.ship.primaryBody.getPoints().get(0));
+                this.addEntity(new Bullet(this, bulletLoc, this.ship.bodyAngle,
+                        Bullet.SPEED));
+                Bullet.cooldown = Config.COOLDOWN;
                 this.ship.ammo--;
             }
-            if (Bullet.cooldown > 0) Bullet.cooldown--;
+            if (Bullet.cooldown > 0)
+                Bullet.cooldown--;
         }
 
         // Spawn ammo occasionally if the player is low.
-        if (this.ship.isActive() && this.ship.ammo < 10 && this.rand.nextDouble() < 0.01) {
-            Point point = this.rand.nextDouble() < 0.5 ? new Point(this.rand.nextDouble(), 1) : new Point(1, this.rand.nextDouble());
+        if (this.ship.isActive() &&
+                this.ship.ammo < Config.LOW_AMMO_THRESHOLD &&
+                this.rand.nextDouble() < Config.LOW_AMMO_SPAWN_RATE) {
+            Point point = this.rand.nextDouble() < 0.5 ? new Point(
+                    this.rand.nextDouble(), 1) : new Point(1,
+                    this.rand.nextDouble());
             this.addEntity(new Powerup(this, point, Powerup.Type.AMMO));
         }
 
-        world.step(1f / 1000f, 0, 0);
-        processContacts();
+        this.world.step(Config.WORLD_STEP_DT, 0, 0);
+        this.processContacts();
     }
 
     static class ContactData {
@@ -104,15 +114,18 @@ public class Game implements ContactListener {
     }
 
     public void processContacts() {
-        Iterator<Map.Entry<Pair<Body, Body>, ContactData>> iterator = this.contacts.entrySet().iterator();
+        Iterator<Map.Entry<Pair<Body, Body>, ContactData>> iterator =
+                this.contacts
+                        .entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<Pair<Body, Body>, ContactData> entry = iterator.next();
-            if (entry.getValue().delay > 0 && this.contacts.size() < 100) {
+            if (entry.getValue().delay > 0 &&
+                    this.contacts.size() < Config.MAX_CONTACTS_FOR_DELAY) {
                 entry.getValue().delay--;
                 continue;
             }
-            Entity entityA = bodyMap.get(entry.getKey().val0);
-            Entity entityB = bodyMap.get(entry.getKey().val1);
+            Entity entityA = this.bodyMap.get(entry.getKey().val0);
+            Entity entityB = this.bodyMap.get(entry.getKey().val1);
             if (entityA == null || entityB == null) {
                 iterator.remove();
                 continue;
@@ -124,15 +137,15 @@ public class Game implements ContactListener {
     }
 
     public void setAccelerating(boolean accelerating) {
-        ship.accelerate(accelerating ? 0.0005 : 0);
+        this.ship.accelerate(accelerating ? Config.SHIP_ACCELERATION : 0);
     }
 
     public void setTurningLeft(boolean turningLeft) {
-        ship.turningLeft = turningLeft;
+        this.ship.turningLeft = turningLeft;
     }
 
     public void setTurningRight(boolean turningRight) {
-        ship.turningRight = turningRight;
+        this.ship.turningRight = turningRight;
     }
 
     public List<Entity> getEntities() {
@@ -150,12 +163,17 @@ public class Game implements ContactListener {
     @Override
     public void beginContact(Contact contact) {
         if (contact.isEnabled() && contact.isTouching()) {
-            Entity entityA = bodyMap.get(contact.m_fixtureA.m_body);
-            Entity entityB = bodyMap.get(contact.m_fixtureB.m_body);
-            if (entityA == null || entityB == null) return;
-            if (contacts.containsKey(new Pair<>(contact.m_fixtureA.m_body, contact.m_fixtureB.m_body))) return;
-            int contactDelay = entityA.getContactDelay(entityB) + entityB.getContactDelay(entityA);
-            contacts.put(new Pair<>(contact.m_fixtureA.m_body, contact.m_fixtureB.m_body),
+            Entity entityA = this.bodyMap.get(contact.m_fixtureA.m_body);
+            Entity entityB = this.bodyMap.get(contact.m_fixtureB.m_body);
+            if (entityA == null || entityB == null)
+                return;
+            if (this.contacts.containsKey(new Pair<>(contact.m_fixtureA.m_body,
+                    contact.m_fixtureB.m_body)))
+                return;
+            int contactDelay = entityA.getContactDelay(entityB) +
+                    entityB.getContactDelay(entityA);
+            this.contacts.put(new Pair<>(contact.m_fixtureA.m_body,
+                            contact.m_fixtureB.m_body),
                     new ContactData(contact, contactDelay));
         }
     }

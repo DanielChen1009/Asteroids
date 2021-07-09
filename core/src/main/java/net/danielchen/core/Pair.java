@@ -15,16 +15,19 @@ public class Pair<A, B> {
 
     @Override
     public final int hashCode() {
-        int result = PRIME + val0.hashCode();
-        result = PRIME * result + val1.hashCode();
+        int result = PRIME + this.val0.hashCode();
+        result = PRIME * result + this.val1.hashCode();
         return result;
     }
 
     @Override
     public final boolean equals(final Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (this.getClass() != obj.getClass())
+            return false;
         final Pair<A, B> other = (Pair<A, B>) obj;
         return this.val0.equals(other.val0) && this.val1.equals(other.val1);
     }

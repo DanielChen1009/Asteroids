@@ -26,14 +26,18 @@ public class Bullet extends Entity {
 
     @Override
     public void update() {
-        if (lifetimeRemaining > 0) lifetimeRemaining--;
-        else active = false;
+        if (this.lifetimeRemaining > 0)
+            this.lifetimeRemaining--;
+        else
+            this.active = false;
         super.update();
     }
 
     @Override
     public void contact(Entity other, Body myBody, Body otherBody) {
-        if (other instanceof Bullet || other instanceof Ship || other instanceof Powerup) return;
+        if (other instanceof Bullet || other instanceof Ship ||
+                other instanceof Powerup)
+            return;
         super.contact(other, myBody, otherBody);
     }
 }

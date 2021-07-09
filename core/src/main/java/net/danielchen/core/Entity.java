@@ -29,7 +29,8 @@ class EntityBody {
     private Point center;
     private float angle;
 
-    public EntityBody(Entity entity, Game game, List<Point> points, Point center) {
+    public EntityBody(Entity entity, Game game, List<Point> points,
+                      Point center) {
         this.entity = entity;
         this.game = game;
         this.world = game.world;
@@ -71,16 +72,21 @@ class EntityBody {
     public Set<Edge> getOutOfBounds() {
         Set<Edge> edges = new HashSet<>();
         for (Point p : this.points) {
-            if (this.center.x + p.x > 1) edges.add(Edge.RIGHT);
-            if (this.center.x + p.x < 0) edges.add(Edge.LEFT);
-            if (this.center.y + p.y > 1) edges.add(Edge.DOWN);
-            if (this.center.y + p.y < 0) edges.add(Edge.UP);
+            if (this.center.x + p.x > 1)
+                edges.add(Edge.RIGHT);
+            if (this.center.x + p.x < 0)
+                edges.add(Edge.LEFT);
+            if (this.center.y + p.y > 1)
+                edges.add(Edge.DOWN);
+            if (this.center.y + p.y < 0)
+                edges.add(Edge.UP);
         }
         return edges;
     }
 
     EntityBody copy() {
-        return new EntityBody(this.entity, this.game, new ArrayList<>(this.model), this.center.copy());
+        return new EntityBody(this.entity, this.game,
+                new ArrayList<>(this.model), this.center.copy());
     }
 
     public List<Point> getPoints() {
@@ -100,7 +106,8 @@ class EntityBody {
             p.x = modelP.x * Math.cos(angle) - modelP.y * Math.sin(angle);
             p.y = modelP.y * Math.cos(angle) + modelP.x * Math.sin(angle);
         }
-        this.body.setTransform(new Vec2((float) this.center.x, (float) this.center.y), angle);
+        this.body.setTransform(
+                new Vec2((float) this.center.x, (float) this.center.y), angle);
     }
 
     Body getBody() {
@@ -154,21 +161,28 @@ public class Entity {
     }
 
     public void update() {
-        if (this.immortalTime > 0) --this.immortalTime;
+        if (this.immortalTime > 0)
+            --this.immortalTime;
         this.createWrapBodies();
 
         if (this.primaryBody.getOutOfBounds().isEmpty()) {
-            // The ship's primary body is fully in the window. Destroy all wrap bodies.
-            for (EntityBody body : this.wrapBodies.values()) body.destroy();
+            // The ship's primary body is fully in the window. Destroy all
+            // wrap bodies.
+            for (EntityBody body : this.wrapBodies.values())
+                body.destroy();
             this.wrapBodies.clear();
         } else {
-            if (this.wrapBodies.isEmpty()) throw new IllegalStateException("Expected wrap bodies");
+            if (this.wrapBodies.isEmpty())
+                throw new IllegalStateException("Expected wrap bodies");
             for (EntityBody wrapBody : this.wrapBodies.values()) {
-                // If any wrap body is fully in the window, move the primary body there and
+                // If any wrap body is fully in the window, move the primary
+                // body there and
                 // destroy all wrap bodies.
                 if (wrapBody.getOutOfBounds().isEmpty()) {
-                    this.primaryBody.moveTo(wrapBody.getCenter(), wrapBody.getAngle());
-                    for (EntityBody body : this.wrapBodies.values()) body.destroy();
+                    this.primaryBody
+                            .moveTo(wrapBody.getCenter(), wrapBody.getAngle());
+                    for (EntityBody body : this.wrapBodies.values())
+                        body.destroy();
                     this.wrapBodies.clear();
                     break;
                 }
@@ -189,7 +203,8 @@ public class Entity {
         // Create any wrap bodies when the primary body is out of bounds.
         Set<Edge> outOfBounds = this.primaryBody.getOutOfBounds();
         if (outOfBounds.size() > 2) {
-            throw new IllegalStateException("Cannot have more than 2 edges out of bounds.");
+            throw new IllegalStateException(
+                    "Cannot have more than 2 edges out of bounds.");
         }
         for (Edge edge : outOfBounds) {
             Set<Edge> key = Collections.singleton(edge);
@@ -202,7 +217,8 @@ public class Entity {
         if (outOfBounds.size() == 2) {
             if (!this.wrapBodies.containsKey(outOfBounds)) {
                 EntityBody body = this.primaryBody.copy();
-                for (Edge edge : outOfBounds) body.wrap(edge);
+                for (Edge edge : outOfBounds)
+                    body.wrap(edge);
                 this.wrapBodies.put(outOfBounds, body);
             }
         }
@@ -235,7 +251,8 @@ public class Entity {
     }
 
     public void contact(Entity other, Body myBody, Body otherBody) {
-        if (this.immortalTime > 0) return;
+        if (this.immortalTime > 0)
+            return;
         this.active = false;
     }
 

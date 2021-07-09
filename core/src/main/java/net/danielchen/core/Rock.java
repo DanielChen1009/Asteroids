@@ -19,7 +19,7 @@ public class Rock extends Entity {
         this.center = center;
         this.size = size;
         this.setPrimaryBody(this.createRock(game));
-        this.speed = (this.rand.nextDouble() + 1) * 0.003;
+        this.speed = (this.rand.nextDouble() + 1) * Config.BASE_ROCK_SPEED;
         this.rotationSpeed = (this.rand.nextDouble() + 0.5) * Math.PI / 20;
         this.travelAngle = (float) (this.rand.nextGaussian() * 2.0 * Math.PI);
     }
@@ -28,22 +28,27 @@ public class Rock extends Entity {
         super("ROCK", parent.game);
         this.size = parent.size * (this.rand.nextDouble() + 0.5) * 0.5;
         this.center = parent.primaryBody.getCenter().copy();
-        this.center.x = this.center.x + 0.2 * this.rand.nextGaussian() * (parent.size + this.size);
-        this.center.y = this.center.y + 0.2 * this.rand.nextGaussian() * (parent.size + this.size);
-        this.setPrimaryBody(this.createRock(game));
+        this.center.x = this.center.x +
+                0.2 * this.rand.nextGaussian() * (parent.size + this.size);
+        this.center.y = this.center.y +
+                0.2 * this.rand.nextGaussian() * (parent.size + this.size);
+        this.setPrimaryBody(this.createRock(this.game));
         this.speed = parent.speed * (this.rand.nextGaussian() * 0.1 + 0.8);
-        this.rotationSpeed = parent.rotationSpeed * (this.rand.nextGaussian() * 0.1 + 0.8);
+        this.rotationSpeed =
+                parent.rotationSpeed * (this.rand.nextGaussian() * 0.1 + 0.8);
         this.travelAngle = collider.travelAngle + (float) angle;
     }
 
     @Override
     public void update() {
-        dx = speed * Math.cos(travelAngle);
-        dy = speed * Math.sin(travelAngle);
-        this.rotateBody(rotationSpeed);
+        this.dx = this.speed * Math.cos(this.travelAngle);
+        this.dy = this.speed * Math.sin(this.travelAngle);
+        this.rotateBody(this.rotationSpeed);
         super.update();
-        if (this.lifetime > 0 && this.lifetime != Integer.MAX_VALUE) this.lifetime--;
-        if (this.lifetime <= 0) this.active = false;
+        if (this.lifetime > 0 && this.lifetime != Integer.MAX_VALUE)
+            this.lifetime--;
+        if (this.lifetime <= 0)
+            this.active = false;
     }
 
     /**
@@ -51,13 +56,16 @@ public class Rock extends Entity {
      */
     public EntityBody createRock(Game game) {
         List<Point> body = new ArrayList<>();
-        int numPoints = rand.nextInt(4) + 5;
+        int numPoints = this.rand.nextInt(4) + 5;
         double angle = 0;
         for (int i = 0; i < numPoints; ++i) {
-            angle += (rand.nextDouble() + 0.75) * Math.PI / numPoints + Math.PI / (3 * (double) numPoints / 2);
-            double radius = (rand.nextDouble() + 0.75) * size;
-            if (radius > size) radius = size;
-            if (radius < size / 2) radius = size / 2;
+            angle += (this.rand.nextDouble() + 0.75) * Math.PI / numPoints +
+                    Math.PI / (3 * (double) numPoints / 2);
+            double radius = (this.rand.nextDouble() + 0.75) * this.size;
+            if (radius > this.size)
+                radius = this.size;
+            if (radius < this.size / 2)
+                radius = this.size / 2;
             double x = Math.cos(angle) * radius;
             double y = Math.sin(angle) * radius;
             body.add(new Point(x, y));
@@ -67,20 +75,25 @@ public class Rock extends Entity {
 
     @Override
     public int getContactDelay(Entity other) {
-        if (other instanceof Rock) return 2;
-        if (other instanceof Ship) return 3;
+        if (other instanceof Rock)
+            return 2;
+        if (other instanceof Ship)
+            return 3;
         return super.getContactDelay(other);
     }
 
     @Override
     public void contact(Entity other, Body myBody, Body otherBody) {
-        if (this.isDebris) return;
-        if (other instanceof Powerup) return;
+        if (this.isDebris)
+            return;
+        if (other instanceof Powerup)
+            return;
 
         // Handle collisions with other rocks to simulate bouncing-off effect.
         if (other instanceof Rock) {
             Rock otherRock = (Rock) other;
-            if (otherRock.isDebris) return;
+            if (otherRock.isDebris)
+                return;
             Vec2 p1 = myBody.getWorldCenter();
             Vec2 p2 = otherBody.getWorldCenter();
             double dy = p1.y - p2.y + this.rand.nextGaussian() * 0.0005;
@@ -90,20 +103,25 @@ public class Rock extends Entity {
             double avgSpeed = (this.speed + otherRock.speed) * 0.5;
             this.speed = avgSpeed;
             otherRock.speed = avgSpeed;
-            double avgRotSpeed = (this.rotationSpeed + otherRock.rotationSpeed) * 0.5;
+            double avgRotSpeed =
+                    (this.rotationSpeed + otherRock.rotationSpeed) * 0.5;
             this.rotationSpeed = avgRotSpeed;
             otherRock.rotationSpeed = avgRotSpeed;
             return;
         }
 
-        // If the rock is marked immortal, we don't process it further, unless ship is invincible.
+        // If the rock is marked immortal, we don't process it further,
+        // unless ship is invincible.
         // In that case we want the ship to just absolutely wreck everything.
-        if (this.immortalTime > 0 && !this.game.ship.powerups.containsKey(Powerup.Type.INVINCIBLE)) return;
+        if (this.immortalTime > 0 &&
+                !this.game.ship.powerups.containsKey(Powerup.Type.INVINCIBLE))
+            return;
 
         // Spawn some debris to simulate explosion.
         int numDebris = this.rand.nextInt(5) + 5;
         for (int i = 0; i < numDebris; i++) {
-            Rock debris = new Rock(this.game, this.primaryBody.getCenter().copy(), this.size * 0.1);
+            Rock debris = new Rock(this.game,
+                    this.primaryBody.getCenter().copy(), this.size * 0.1);
             debris.lifetime = 5 + (int) (this.rand.nextGaussian() * 2);
             debris.speed = 0.02 + this.rand.nextGaussian() * 0.01;
             debris.isDebris = true;
@@ -111,22 +129,28 @@ public class Rock extends Entity {
         }
 
         // Spawn some smaller rocks to simulate breaking up the bigger rock.
-        if (this.size > 0.03) {
+        if (this.size > Config.MIN_ROCK_BREAK_UP_SIZE) {
             int numChildren = this.rand.nextInt(3) + 2;
             for (int i = 0; i < numChildren; i++) {
-                Rock child = new Rock(this, other, this.rand.nextGaussian() * Math.PI * 0.5 * i);
+                Rock child = new Rock(this, other,
+                        this.rand.nextGaussian() * Math.PI * 0.5 * i);
                 this.game.addEntity(child);
             }
         }
 
-        // Chance to drop ammo for the player, which decreases as the number of game objects increase.
+        // Chance to drop ammo for the player, which decreases as the number
+        // of game objects increase.
         if (this.rand.nextDouble() < 5.0 / this.game.world.getBodyCount()) {
-            this.game.addEntity(new Powerup(this.game, this.primaryBody.getCenter().copy(), Powerup.Type.AMMO));
+            this.game.addEntity(
+                    new Powerup(this.game, this.primaryBody.getCenter().copy(),
+                            Powerup.Type.AMMO));
         }
 
         // Chance to drop powerups.
         if (this.rand.nextDouble() < 1.0 / this.game.world.getBodyCount()) {
-            this.game.addEntity(new Powerup(this.game, this.primaryBody.getCenter().copy(), Powerup.Type.INVINCIBLE));
+            this.game.addEntity(
+                    new Powerup(this.game, this.primaryBody.getCenter().copy(),
+                            Powerup.Type.INVINCIBLE));
         }
 
         // This destroys the current rock.
