@@ -56,10 +56,8 @@ public class Game implements ContactListener {
     public void update() {
         // Continuously spawn rocks, raising the limit as the score goes up.
         while (this.world.getBodyCount() < this.score * 0.1 + 5) {
-            Rock rock = new Rock(this,
-                    new Point(this.rand.nextDouble(), 1), this.rand.nextGaussian() * 0.01 + 0.06);
-            rock.travelAngle = (float) Math.atan2(rock.primaryBody.getCenter().y - this.ship.primaryBody.getCenter().y,
-                    rock.primaryBody.getCenter().x - this.ship.primaryBody.getCenter().x);
+            Point point = this.rand.nextDouble() < 0.5 ? new Point(this.rand.nextDouble(), 1) : new Point(1, this.rand.nextDouble());
+            Rock rock = new Rock(this, point, this.rand.nextGaussian() * 0.01 + 0.06);
             this.addEntity(rock);
         }
 
@@ -85,7 +83,13 @@ public class Game implements ContactListener {
             if (Bullet.cooldown > 0) Bullet.cooldown--;
         }
 
-        world.step(1f / 1000f, 10, 10);
+        // Spawn ammo occasionally if the player is low.
+        if (this.ship.isActive() && this.ship.ammo < 10 && this.rand.nextDouble() < 0.01) {
+            Point point = this.rand.nextDouble() < 0.5 ? new Point(this.rand.nextDouble(), 1) : new Point(1, this.rand.nextDouble());
+            this.addEntity(new Ammo(this, point));
+        }
+
+        world.step(1f / 1000f, 0, 0);
         processContacts();
     }
 
@@ -150,11 +154,14 @@ public class Game implements ContactListener {
     }
 
     @Override
-    public void endContact(Contact contact) {}
+    public void endContact(Contact contact) {
+    }
 
     @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {}
+    public void preSolve(Contact contact, Manifold oldManifold) {
+    }
 
     @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {}
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+    }
 }

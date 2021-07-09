@@ -25,8 +25,8 @@ public class Rock extends Entity {
         super("ROCK", parent.game);
         this.size = parent.size * (this.rand.nextDouble() + 0.5) * 0.5;
         this.center = parent.primaryBody.getCenter().copy();
-        this.center.x = this.center.x + 0.5 * this.rand.nextGaussian() * (parent.size + this.size);
-        this.center.y = this.center.y + 0.5 * this.rand.nextGaussian() * (parent.size + this.size);
+        this.center.x = this.center.x + 0.2 * this.rand.nextGaussian() * (parent.size + this.size);
+        this.center.y = this.center.y + 0.2 * this.rand.nextGaussian() * (parent.size + this.size);
         this.setPrimaryBody(this.createRock(game));
         this.speed = parent.speed * (this.rand.nextGaussian() * 0.1 + 0.8);
         this.rotationSpeed = parent.rotationSpeed * (this.rand.nextGaussian() * 0.1 + 0.8);
@@ -113,8 +113,8 @@ public class Rock extends Entity {
             }
         }
 
-        // Chance to drop ammo for the player.
-        if (this.rand.nextDouble() < 0.3) {
+        // Chance to drop ammo for the player, which decreases as the number of game objects increase.
+        if (this.rand.nextDouble() < 5.0 / this.game.world.getBodyCount()) {
             this.game.addEntity(new Ammo(this.game, this.primaryBody.getCenter().copy()));
         }
 

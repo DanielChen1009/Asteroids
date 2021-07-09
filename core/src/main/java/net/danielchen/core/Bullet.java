@@ -33,7 +33,7 @@ public class Bullet extends Entity {
 
     @Override
     public void contact(Entity other) {
-        if (other instanceof Bullet || other instanceof Ship) return;
+        if (other instanceof Bullet || other instanceof Ship || other instanceof Ammo) return;
         super.contact(other);
     }
 }

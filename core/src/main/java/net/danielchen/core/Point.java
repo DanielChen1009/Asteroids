@@ -13,6 +13,12 @@ class Point {
         this.y += p.y;
     }
 
+    public double distance(Point p) {
+        double dx = this.x - p.x;
+        double dy = this.y - p.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
     public Point copy() {
         return new Point(x, y);
     }

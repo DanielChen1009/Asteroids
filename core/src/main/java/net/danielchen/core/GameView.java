@@ -6,6 +6,9 @@ import playn.scene.ImageLayer;
 import playn.scene.Layer;
 import pythagoras.f.IDimension;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameView extends GroupLayer {
     private static final float LINE_WIDTH = 2;
 
@@ -42,7 +45,15 @@ public class GameView extends GroupLayer {
             surf.setFillColor(0xFF000000); // black with full alpha
             surf.fillRect(0, 0, width(), height());
             for (Entity entity : this.game.getEntities()) paintEntity(surf, entity);
-            this.textLayer.showText("Press ESC to restart. Score: " + this.game.score() + " Ammo: " + this.game.ship.ammo);
+            this.textLayer.addText(new Text(
+                    "Press ESC to restart. Score: " + this.game.score() + " Ammo: " + this.game.ship.ammo, 0, 0));
+            if (!this.game.ship.isActive()) {
+                Text message = new Text(
+                        "GAME OVER", this.viewSize.width() / 2, this.viewSize.height() /2);
+                message.centered = true;
+                this.textLayer.addText(message);
+            }
+            this.textLayer.showText();
         }
 
         private void paintEntity(Surface surf, Entity entity) {
@@ -70,18 +81,47 @@ public class GameView extends GroupLayer {
         }
     }
 
+    // Represents a string text with associated coordinates.
+    static class Text {
+        String text;
+        float x, y;
+        float size;
+        boolean centered;
+
+        Text(String text, float x, float y) {
+            this.text = text;
+            this.x = x;
+            this.y = y;
+            this.size = 16f;
+            this.centered = false;
+        }
+    }
+
     static class TextLayer extends ImageLayer {
         private final Platform plat;
+        private final List<Text> texts;
 
-        TextLayer(Platform plat) {this.plat = plat;}
+        TextLayer(Platform plat) {
+            this.plat = plat;
+            texts = new ArrayList<>();
+        }
 
-        void showText(String text) {
-            Font font = new Font("Helvetica", Font.Style.BOLD, 16f);
-            TextFormat format = new TextFormat(font);
-            TextLayout layout = this.plat.graphics().layoutText(text, format);
-            Canvas canvas = this.plat.graphics().createCanvas(layout.size);
-            canvas.setFillColor(0xFFFFFFFF).fillText(layout, 0, 0);
+        void addText(Text text) {
+            texts.add(text);
+        }
+
+        void showText() {
+            Canvas canvas = this.plat.graphics().createCanvas(this.plat.graphics().viewSize);
+            canvas.setFillColor(0x00000000).fillRect(0, 0, canvas.width, canvas.height);
+            for (Text text: texts) {
+                Font font = new Font("Helvetica", Font.Style.BOLD, text.size);
+                TextFormat format = new TextFormat(font);
+                TextLayout layout = this.plat.graphics().layoutText(text.text, format);
+                canvas.setFillColor(0xFFFFFFFF).fillText(layout,
+                        text.centered ? text.x - layout.size.width() / 2 : text.x, text.y);
+            }
             this.setTile(canvas.toTexture());
+            texts.clear();
         }
     }
 }

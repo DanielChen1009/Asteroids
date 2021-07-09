@@ -30,8 +30,18 @@ public class Ammo extends Entity {
         else active = false;
         this.speed *= this.rand.nextGaussian() * 0.01 + 1.0;
         this.angle *= this.rand.nextGaussian() * 0.01 + 1.0;
-        this.dx = this.speed * Math.cos(this.angle);
-        this.dy = this.speed * Math.sin(this.angle);
+
+        // Make the ammo attract towards the ship at a certain distance.
+        Point p1 = this.primaryBody.getCenter();
+        Point p2 = this.game.ship.primaryBody.getCenter();
+        if (this.game.ship.isActive() && p1.distance(p2) < 0.1) {
+            double v = this.rand.nextGaussian() * 0.002 + 0.01;
+            this.dx += v * (p2.x - p1.x);
+            this.dy += v * (p2.y - p1.y);
+        } else {
+            this.dx = this.speed * Math.cos(this.angle);
+            this.dy = this.speed * Math.sin(this.angle);
+        }
         super.update();
     }
 
