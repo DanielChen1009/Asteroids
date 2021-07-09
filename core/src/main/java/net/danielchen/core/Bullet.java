@@ -1,5 +1,7 @@
 package net.danielchen.core;
 
+import org.jbox2d.dynamics.Body;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,8 +32,8 @@ public class Bullet extends Entity {
     }
 
     @Override
-    public void contact(Entity other) {
+    public void contact(Entity other, Body myBody, Body otherBody) {
         if (other instanceof Bullet || other instanceof Ship || other instanceof Powerup) return;
-        super.contact(other);
+        super.contact(other, myBody, otherBody);
     }
 }

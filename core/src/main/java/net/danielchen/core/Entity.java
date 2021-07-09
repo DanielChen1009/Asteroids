@@ -234,7 +234,7 @@ public class Entity {
         return this.active;
     }
 
-    public void contact(Entity other) {
+    public void contact(Entity other, Body myBody, Body otherBody) {
         if (this.immortalTime > 0) return;
         this.active = false;
     }

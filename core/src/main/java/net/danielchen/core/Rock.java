@@ -1,5 +1,8 @@
 package net.danielchen.core;
 
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +73,7 @@ public class Rock extends Entity {
     }
 
     @Override
-    public void contact(Entity other) {
+    public void contact(Entity other, Body myBody, Body otherBody) {
         if (this.isDebris) return;
         if (other instanceof Powerup) return;
 
@@ -78,8 +81,8 @@ public class Rock extends Entity {
         if (other instanceof Rock) {
             Rock otherRock = (Rock) other;
             if (otherRock.isDebris) return;
-            Point p1 = this.primaryBody.getCenter();
-            Point p2 = other.primaryBody.getCenter();
+            Vec2 p1 = myBody.getWorldCenter();
+            Vec2 p2 = otherBody.getWorldCenter();
             double dy = p1.y - p2.y + this.rand.nextGaussian() * 0.0005;
             double dx = p1.x - p2.x + this.rand.nextGaussian() * 0.0005;
             this.travelAngle = (float) Math.atan2(dy, dx);
@@ -122,12 +125,12 @@ public class Rock extends Entity {
         }
 
         // Chance to drop powerups.
-        if (this.rand.nextDouble() < 2.0 / this.game.world.getBodyCount()) {
+        if (this.rand.nextDouble() < 1.0 / this.game.world.getBodyCount()) {
             this.game.addEntity(new Powerup(this.game, this.primaryBody.getCenter().copy(), Powerup.Type.INVINCIBLE));
         }
 
         // This destroys the current rock.
         this.game.score += this.size * 100;
-        super.contact(other);
+        super.contact(other, myBody, otherBody);
     }
 }

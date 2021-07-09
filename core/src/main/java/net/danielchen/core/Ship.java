@@ -1,6 +1,7 @@
 package net.danielchen.core;
 
 import net.danielchen.core.Powerup.Type;
+import org.jbox2d.dynamics.Body;
 
 import java.util.*;
 
@@ -53,7 +54,7 @@ public class Ship extends Entity {
     }
 
     @Override
-    public void contact(Entity other) {
+    public void contact(Entity other, Body myBody, Body otherBody) {
         if (other instanceof Bullet || other instanceof Ship) return;
         if (other instanceof Rock && ((Rock) other).isDebris) return;
 
@@ -72,7 +73,7 @@ public class Ship extends Entity {
 
         // Process death only if we are not invincible.
         if (!this.powerups.containsKey(Type.INVINCIBLE)) {
-            super.contact(other);
+            super.contact(other, myBody, otherBody);
             // When the ship dies, do a radial burst of bullets for special effect.
             int numBullets = this.rand.nextInt(20) + 20;
             for (int i = 0; i < numBullets; i++) {

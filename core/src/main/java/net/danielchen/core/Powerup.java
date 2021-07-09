@@ -1,5 +1,7 @@
 package net.danielchen.core;
 
+import org.jbox2d.dynamics.Body;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,8 +66,8 @@ public class Powerup extends Entity {
     }
 
     @Override
-    public void contact(Entity other) {
+    public void contact(Entity other, Body myBody, Body otherBody) {
         // Powerup doesn't touch any object except ships.
-        if (other instanceof Ship) super.contact(other);
+        if (other instanceof Ship) super.contact(other, myBody, otherBody);
     }
 }

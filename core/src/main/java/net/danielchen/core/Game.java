@@ -16,7 +16,7 @@ public class Game implements ContactListener {
     // Jbox2d object containing physics world for collision detection.
     World world;
     private final List<Entity> entities;
-    private final Map<Pair<Entity, Entity>, ContactData> contacts;
+    private final Map<Pair<Body, Body>, ContactData> contacts;
     private static final int COOLDOWN = 4;
     private boolean isFiring;
 
@@ -104,15 +104,21 @@ public class Game implements ContactListener {
     }
 
     public void processContacts() {
-        Iterator<Map.Entry<Pair<Entity, Entity>, ContactData>> iterator = this.contacts.entrySet().iterator();
+        Iterator<Map.Entry<Pair<Body, Body>, ContactData>> iterator = this.contacts.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<Pair<Entity, Entity>, ContactData> entry = iterator.next();
-            if (entry.getValue().delay > 0) {
+            Map.Entry<Pair<Body, Body>, ContactData> entry = iterator.next();
+            if (entry.getValue().delay > 0 && this.contacts.size() < 100) {
                 entry.getValue().delay--;
                 continue;
             }
-            entry.getKey().val0.contact(entry.getKey().val1);
-            entry.getKey().val1.contact(entry.getKey().val0);
+            Entity entityA = bodyMap.get(entry.getKey().val0);
+            Entity entityB = bodyMap.get(entry.getKey().val1);
+            if (entityA == null || entityB == null) {
+                iterator.remove();
+                continue;
+            }
+            entityA.contact(entityB, entry.getKey().val0, entry.getKey().val1);
+            entityB.contact(entityA, entry.getKey().val1, entry.getKey().val0);
             iterator.remove();
         }
     }
@@ -147,9 +153,10 @@ public class Game implements ContactListener {
             Entity entityA = bodyMap.get(contact.m_fixtureA.m_body);
             Entity entityB = bodyMap.get(contact.m_fixtureB.m_body);
             if (entityA == null || entityB == null) return;
-            if (contacts.containsKey(new Pair<>(entityA, entityB))) return;
+            if (contacts.containsKey(new Pair<>(contact.m_fixtureA.m_body, contact.m_fixtureB.m_body))) return;
             int contactDelay = entityA.getContactDelay(entityB) + entityB.getContactDelay(entityA);
-            contacts.put(new Pair<>(entityA, entityB), new ContactData(contact, contactDelay));
+            contacts.put(new Pair<>(contact.m_fixtureA.m_body, contact.m_fixtureB.m_body),
+                    new ContactData(contact, contactDelay));
         }
     }
 
