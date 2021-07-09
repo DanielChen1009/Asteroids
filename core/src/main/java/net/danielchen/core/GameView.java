@@ -60,7 +60,7 @@ public class GameView extends GroupLayer {
             if (entity instanceof Ship) surf.setFillColor(0xFF00FF00);
             else if (entity instanceof Bullet) surf.setFillColor(0xFF2288AA);
             else if (entity instanceof Rock) surf.setFillColor(0xFFAAAAAA);
-            else if (entity instanceof Ammo) surf.setFillColor(0xFF2288AA);
+            else if (entity instanceof Powerup) surf.setFillColor(((Powerup) entity).type.color);
             else surf.setFillColor(0xFFFFFFFF);
             paintBody(surf, entity.primaryBody);
             for (EntityBody wrapBody : entity.wrapBodies.values()) {

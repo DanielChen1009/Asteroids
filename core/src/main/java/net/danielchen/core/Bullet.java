@@ -1,7 +1,5 @@
 package net.danielchen.core;
 
-import org.jbox2d.dynamics.World;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +31,7 @@ public class Bullet extends Entity {
 
     @Override
     public void contact(Entity other) {
-        if (other instanceof Bullet || other instanceof Ship || other instanceof Ammo) return;
+        if (other instanceof Bullet || other instanceof Ship || other instanceof Powerup) return;
         super.contact(other);
     }
 }

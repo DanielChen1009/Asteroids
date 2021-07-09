@@ -3,15 +3,25 @@ package net.danielchen.core;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Ammo extends Entity {
+public class Powerup extends Entity {
+    enum Type {
+        AMMO(0xFF2288AA);
+
+        Type(int color) {
+            this.color = color;
+        }
+        int color;
+    }
     private int lifetimeRemaining;
     private double speed;
     private double angle;
+    Type type;
 
-    public Ammo(Game game, Point center) {
-        super("AMMO", game);
+    public Powerup(Game game, Point center, Type type) {
+        super("POWERUP", game);
+        this.type = type;
         List<Point> primaryBody = new ArrayList<>();
-        // Ammo is just a square powerup.
+        // All powerups are squares.
         double size = -1.0 / 100;
         primaryBody.add(new Point(-size, -size));
         primaryBody.add(new Point(-size, size));
@@ -25,13 +35,13 @@ public class Ammo extends Entity {
 
     @Override
     public void update() {
-        // Ammo has a limited lifetime and randomly jiggles as it moves.
+        // Powerup has a limited lifetime and randomly jiggles as it moves.
         if (lifetimeRemaining > 0) lifetimeRemaining--;
         else active = false;
         this.speed *= this.rand.nextGaussian() * 0.01 + 1.0;
         this.angle *= this.rand.nextGaussian() * 0.01 + 1.0;
 
-        // Make the ammo attract towards the ship at a certain distance.
+        // Make the powerup attract towards the ship at a certain distance.
         Point p1 = this.primaryBody.getCenter();
         Point p2 = this.game.ship.primaryBody.getCenter();
         if (this.game.ship.isActive() && p1.distance(p2) < 0.1) {
@@ -47,7 +57,7 @@ public class Ammo extends Entity {
 
     @Override
     public void contact(Entity other) {
-        // Ammo doesn't touch any object except ships.
+        // Powerup doesn't touch any object except ships.
         if (other instanceof Ship) super.contact(other);
     }
 }

@@ -44,9 +44,12 @@ public class Ship extends Entity {
         if (other instanceof Bullet || other instanceof Ship) return;
         if (other instanceof Rock && ((Rock) other).isDebris) return;
 
-        if (other instanceof Ammo) {
-            other.active = false;
-            this.ammo += 10;
+        if (other instanceof Powerup) {
+            Powerup powerup = (Powerup) other;
+            powerup.active = false;
+            if (powerup.type == Powerup.Type.AMMO) {
+                this.ammo += 10;
+            }
             return;
         }
         super.contact(other);

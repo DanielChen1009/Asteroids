@@ -73,7 +73,7 @@ public class Rock extends Entity {
     public void contact(Entity other) {
         if (this.immortalTime > 0 || this.isDebris) return;
 
-        if (other instanceof Ammo) return;
+        if (other instanceof Powerup) return;
 
         // Handle collisions with other rocks to simulate bouncing-off effect.
         if (other instanceof Rock) {
@@ -115,7 +115,7 @@ public class Rock extends Entity {
 
         // Chance to drop ammo for the player, which decreases as the number of game objects increase.
         if (this.rand.nextDouble() < 5.0 / this.game.world.getBodyCount()) {
-            this.game.addEntity(new Ammo(this.game, this.primaryBody.getCenter().copy()));
+            this.game.addEntity(new Powerup(this.game, this.primaryBody.getCenter().copy(), Powerup.Type.AMMO));
         }
 
         // This destroys the current rock.
