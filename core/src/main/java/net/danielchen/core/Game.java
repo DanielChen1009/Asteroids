@@ -46,6 +46,12 @@ public class Game implements ContactListener {
         this.isFiring = false;
         this.ship = new Ship(this, startPoint);
         this.addEntity(this.ship);
+
+        if (Config.GOD_MODE) {
+            this.ship.powerups.put(Powerup.Type.INVINCIBLE, 99999);
+            this.ship.powerups.put(Powerup.Type.MEGAGUN, 99999);
+            this.ship.ammo = 99999;
+        }
     }
 
     public void addEntity(Entity entity) {
@@ -80,8 +86,19 @@ public class Game implements ContactListener {
             if (this.isFiring && Bullet.cooldown == 0) {
                 Point bulletLoc = this.ship.primaryBody.getCenter().copy();
                 bulletLoc.add(this.ship.primaryBody.getPoints().get(0));
-                this.addEntity(new Bullet(this, bulletLoc, this.ship.bodyAngle,
-                        Bullet.SPEED));
+                if (this.ship.powerups.containsKey(Powerup.Type.MEGAGUN)) {
+                    for (int i = -Config.MEGAGUN_SHOTS / 2;
+                         i <= Config.MEGAGUN_SHOTS / 2; i++) {
+                        this.addEntity(
+                                new Bullet(this, bulletLoc,
+                                        this.ship.bodyAngle +
+                                                Config.MEGAGUN_SPREAD * i
+                                ));
+                    }
+                } else
+                    this.addEntity(
+                            new Bullet(this, bulletLoc, this.ship.bodyAngle,
+                                    Config.BULLET_SPEED));
                 Bullet.cooldown = Config.COOLDOWN;
                 this.ship.ammo--;
             }
@@ -149,7 +166,7 @@ public class Game implements ContactListener {
     }
 
     public List<Entity> getEntities() {
-        return new ArrayList<>(this.bodyMap.values());
+        return this.entities;
     }
 
     public void setFiring(boolean isFiring) {

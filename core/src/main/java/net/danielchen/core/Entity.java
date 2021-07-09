@@ -28,9 +28,15 @@ class EntityBody {
 
     private Point center;
     private float angle;
+    private boolean physicsEnabled;
 
     public EntityBody(Entity entity, Game game, List<Point> points,
                       Point center) {
+        this(entity, game, points, center, true);
+    }
+
+    public EntityBody(Entity entity, Game game, List<Point> points,
+                      Point center, boolean physicsEnabled) {
         this.entity = entity;
         this.game = game;
         this.world = game.world;
@@ -41,32 +47,36 @@ class EntityBody {
         }
         this.center = center;
         this.angle = 0;
+        this.physicsEnabled = physicsEnabled;
+        if (physicsEnabled) {
+            FixtureDef fixtureDef = new FixtureDef();
+            BodyDef bodyDef = new BodyDef();
+            bodyDef.type = BodyType.DYNAMIC;
+            bodyDef.position = new Vec2(0, 0);
+            this.body = this.world.createBody(bodyDef);
 
-        FixtureDef fixtureDef = new FixtureDef();
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyType.DYNAMIC;
-        bodyDef.position = new Vec2(0, 0);
-        this.body = world.createBody(bodyDef);
+            PolygonShape polygonShape = new PolygonShape();
+            Vec2[] polygon = new Vec2[points.size()];
+            for (int i = 0; i < points.size(); ++i) {
+                Point point = points.get(i);
+                polygon[i] = new Vec2((float) point.x, (float) point.y);
+            }
+            polygonShape.set(polygon, polygon.length);
+            fixtureDef.shape = polygonShape;
+            fixtureDef.restitution = 1f;
+            this.body.createFixture(fixtureDef);
+            this.body.setTransform(new Vec2((float) center.x, (float) center.y),
+                    this.angle);
 
-        PolygonShape polygonShape = new PolygonShape();
-        Vec2[] polygon = new Vec2[points.size()];
-        for (int i = 0; i < points.size(); ++i) {
-            Point point = points.get(i);
-            polygon[i] = new Vec2((float) point.x, (float) point.y);
-        }
-        polygonShape.set(polygon, polygon.length);
-        fixtureDef.shape = polygonShape;
-        fixtureDef.restitution = 1f;
-        body.createFixture(fixtureDef);
-        body.setTransform(new Vec2((float) center.x, (float) center.y), angle);
-
-        game.bodyMap.put(body, entity);
+            game.bodyMap.put(this.body, entity);
+        } else
+            this.body = null;
     }
 
     void wrap(Edge edge) {
         Point p = this.center.copy();
         p.add(new Point(edge.dx, edge.dy));
-        moveTo(p, this.angle);
+        this.moveTo(p, this.angle);
     }
 
     public Set<Edge> getOutOfBounds() {
@@ -86,7 +96,8 @@ class EntityBody {
 
     EntityBody copy() {
         return new EntityBody(this.entity, this.game,
-                new ArrayList<>(this.model), this.center.copy());
+                new ArrayList<>(this.model), this.center.copy(),
+                this.physicsEnabled);
     }
 
     public List<Point> getPoints() {
@@ -106,12 +117,11 @@ class EntityBody {
             p.x = modelP.x * Math.cos(angle) - modelP.y * Math.sin(angle);
             p.y = modelP.y * Math.cos(angle) + modelP.x * Math.sin(angle);
         }
-        this.body.setTransform(
-                new Vec2((float) this.center.x, (float) this.center.y), angle);
-    }
-
-    Body getBody() {
-        return this.body;
+        if (this.body != null) {
+            this.body.setTransform(
+                    new Vec2((float) this.center.x, (float) this.center.y),
+                    angle);
+        }
     }
 
     float getAngle() {
@@ -119,8 +129,10 @@ class EntityBody {
     }
 
     void destroy() {
-        this.game.bodyMap.remove(body);
-        this.world.destroyBody(body);
+        if (this.body != null) {
+            this.game.bodyMap.remove(this.body);
+            this.world.destroyBody(this.body);
+        }
     }
 
     @Override
@@ -145,7 +157,7 @@ public class Entity {
     protected boolean active;
 
     // For this many game ticks, this entity cannot be destroyed.
-    protected int immortalTime = 5;
+    protected int immortalTime;
 
     protected final Game game;
     protected final Random rand;
@@ -225,11 +237,9 @@ public class Entity {
     }
 
     public void destroy() {
-        this.game.bodyMap.remove(this.primaryBody.getBody());
-        this.game.world.destroyBody(this.primaryBody.getBody());
+        this.primaryBody.destroy();
         for (EntityBody entityBody : this.wrapBodies.values()) {
-            this.game.bodyMap.remove(entityBody.getBody());
-            this.game.world.destroyBody(entityBody.getBody());
+            entityBody.destroy();
         }
     }
 
@@ -258,5 +268,10 @@ public class Entity {
 
     public int getContactDelay(Entity other) {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        return this.type;
     }
 }

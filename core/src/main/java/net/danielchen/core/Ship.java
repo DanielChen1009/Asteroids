@@ -98,7 +98,7 @@ public class Ship extends Entity {
                         this.primaryBody.getCenter().copy(),
                         i * ((this.rand.nextDouble() + 1) * Math.PI /
                                 numBullets),
-                        Bullet.SPEED * this.rand.nextDouble()));
+                        Config.BULLET_SPEED * this.rand.nextDouble()));
             }
         }
     }

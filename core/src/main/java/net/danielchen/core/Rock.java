@@ -12,12 +12,17 @@ public class Rock extends Entity {
     private double rotationSpeed;
     private double speed;
     private int lifetime = Integer.MAX_VALUE;
-    boolean isDebris = false;
+    boolean isDebris;
 
     public Rock(Game game, Point center, double size) {
+        this(game, center, size, false);
+    }
+
+    public Rock(Game game, Point center, double size, boolean isDebris) {
         super("ROCK", game);
         this.center = center;
         this.size = size;
+        this.isDebris = isDebris;
         this.setPrimaryBody(this.createRock(game));
         this.speed = (this.rand.nextDouble() + 1) * Config.BASE_ROCK_SPEED;
         this.rotationSpeed = (this.rand.nextDouble() + 0.5) * Math.PI / 20;
@@ -26,6 +31,7 @@ public class Rock extends Entity {
 
     public Rock(Rock parent, Entity collider, double angle) {
         super("ROCK", parent.game);
+        this.isDebris = false;
         this.size = parent.size * (this.rand.nextDouble() + 0.5) * 0.5;
         this.center = parent.primaryBody.getCenter().copy();
         this.center.x = this.center.x +
@@ -70,7 +76,7 @@ public class Rock extends Entity {
             double y = Math.sin(angle) * radius;
             body.add(new Point(x, y));
         }
-        return new EntityBody(this, game, body, this.center);
+        return new EntityBody(this, game, body, this.center, !this.isDebris);
     }
 
     @Override
@@ -87,6 +93,10 @@ public class Rock extends Entity {
         if (this.isDebris)
             return;
         if (other instanceof Powerup)
+            return;
+
+        // If the rock is marked immortal, we don't process it further,
+        if (this.immortalTime > 0)
             return;
 
         // Handle collisions with other rocks to simulate bouncing-off effect.
@@ -110,21 +120,13 @@ public class Rock extends Entity {
             return;
         }
 
-        // If the rock is marked immortal, we don't process it further,
-        // unless ship is invincible.
-        // In that case we want the ship to just absolutely wreck everything.
-        if (this.immortalTime > 0 &&
-                !this.game.ship.powerups.containsKey(Powerup.Type.INVINCIBLE))
-            return;
-
         // Spawn some debris to simulate explosion.
-        int numDebris = this.rand.nextInt(5) + 5;
+        int numDebris = this.rand.nextInt(3) + 3;
         for (int i = 0; i < numDebris; i++) {
             Rock debris = new Rock(this.game,
-                    this.primaryBody.getCenter().copy(), this.size * 0.1);
+                    this.primaryBody.getCenter().copy(), this.size * 0.1, true);
             debris.lifetime = 5 + (int) (this.rand.nextGaussian() * 2);
             debris.speed = 0.02 + this.rand.nextGaussian() * 0.01;
-            debris.isDebris = true;
             this.game.addEntity(debris);
         }
 
@@ -138,23 +140,25 @@ public class Rock extends Entity {
             }
         }
 
-        // Chance to drop ammo for the player, which decreases as the number
-        // of game objects increase.
-        if (this.rand.nextDouble() < 5.0 / this.game.world.getBodyCount()) {
-            this.game.addEntity(
-                    new Powerup(this.game, this.primaryBody.getCenter().copy(),
-                            Powerup.Type.AMMO));
-        }
-
-        // Chance to drop powerups.
-        if (this.rand.nextDouble() < 1.0 / this.game.world.getBodyCount()) {
-            this.game.addEntity(
-                    new Powerup(this.game, this.primaryBody.getCenter().copy(),
-                            Powerup.Type.INVINCIBLE));
+        // Chance to drop powerups for the player, which decreases as the number
+        // of total game objects increase.
+        for (Powerup.Type powerup : Powerup.Type.values()) {
+            if (this.rand.nextDouble() <
+                    powerup.spawnRate / this.game.world.getBodyCount()) {
+                this.game.addEntity(
+                        new Powerup(this.game,
+                                this.primaryBody.getCenter().copy(),
+                                powerup));
+            }
         }
 
         // This destroys the current rock.
         this.game.score += this.size * 100;
         super.contact(other, myBody, otherBody);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + (this.isDebris ? " (debris)" : "");
     }
 }

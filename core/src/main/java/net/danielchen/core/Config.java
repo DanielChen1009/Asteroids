@@ -2,6 +2,11 @@ package net.danielchen.core;
 
 public class Config {
     /**
+     * For debugging purposes only.
+     */
+    public static boolean GOD_MODE = false;
+
+    /**
      * GUI related config.
      */
     // Default entity colors
@@ -33,6 +38,17 @@ public class Config {
     public static int LOW_AMMO_THRESHOLD = 10;
     public static double LOW_AMMO_SPAWN_RATE = 0.01;
 
+    public static double BULLET_SIZE = 1.0 / 800;
+    public static double BULLET_SPEED = 0.03;
+    public static int BULLET_LIFETIME = 18;
+
+    public static double MEGABULLET_SIZE = 1.0 / 200;
+    public static double MEGABULLET_SPEED = 0.05;
+    public static int MEGABULLET_LIFETIME = 30;
+
+    public static int MEGAGUN_SHOTS = 5;
+    public static double MEGAGUN_SPREAD = 0.1;
+
     /**
      * Powerup related config.
      */
@@ -58,6 +74,15 @@ public class Config {
      */
     // The higher this number is, the more rocks/stuff will spawn over time.
     public static double SPAWN_RATE = 0.1;
+
+    // The higher this number is, the more ammo powerup will spawn.
+    public static double AMMO_SPAWN_RATE = 3.0;
+
+    // The higher this number is, the more invincible powerup will spawn.
+    public static double INVINCIBLE_SPAWN_RATE = 0.7;
+
+    // The higher this number is, the more megagun powerup will spawn.
+    public static double MEGAGUN_SPAWN_RATE = 0.6;
 
     // The average rock size that is randomly generated.
     public static double BASE_ROCK_SIZE = 0.06;

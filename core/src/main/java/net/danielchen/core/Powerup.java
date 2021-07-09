@@ -8,20 +8,25 @@ import java.util.List;
 public class Powerup extends Entity {
     // The type of this powerup with associated powerup-specific parameters.
     enum Type {
-        AMMO(0xFF2288AA, 20, "+10 ammo", false),
-        INVINCIBLE(0xFFFFFF00, 200, "invincible", true);
+        AMMO(0xFF2288AA, 20, "+10 ammo", false, Config.AMMO_SPAWN_RATE),
+        INVINCIBLE(0xFFFFFF00, 200, "invincible", true,
+                Config.INVINCIBLE_SPAWN_RATE),
+        MEGAGUN(0xFFFF2222, 200, "megagun", true, Config.MEGAGUN_SPAWN_RATE);
 
-        Type(int color, int time, String message, boolean showTime) {
+        Type(int color, int time, String message, boolean showTime,
+             double spawnRate) {
             this.color = color;
             this.time = time;
             this.message = message;
             this.showTime = showTime;
+            this.spawnRate = spawnRate;
         }
 
         int color;
         int time;
         String message; // Message to show the user on the UI about the powerup.
         boolean showTime; // Whether to show the remaining time on the UI.
+        double spawnRate;
     }
 
     private int lifetimeRemaining;
