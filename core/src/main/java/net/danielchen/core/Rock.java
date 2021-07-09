@@ -71,8 +71,7 @@ public class Rock extends Entity {
 
     @Override
     public void contact(Entity other) {
-        if (this.immortalTime > 0 || this.isDebris) return;
-
+        if (this.isDebris) return;
         if (other instanceof Powerup) return;
 
         // Handle collisions with other rocks to simulate bouncing-off effect.
@@ -93,6 +92,10 @@ public class Rock extends Entity {
             otherRock.rotationSpeed = avgRotSpeed;
             return;
         }
+
+        // If the rock is marked immortal, we don't process it further, unless ship is invincible.
+        // In that case we want the ship to just absolutely wreck everything.
+        if (this.immortalTime > 0 && !this.game.ship.powerups.containsKey(Powerup.Type.INVINCIBLE)) return;
 
         // Spawn some debris to simulate explosion.
         int numDebris = this.rand.nextInt(5) + 5;
@@ -116,6 +119,11 @@ public class Rock extends Entity {
         // Chance to drop ammo for the player, which decreases as the number of game objects increase.
         if (this.rand.nextDouble() < 5.0 / this.game.world.getBodyCount()) {
             this.game.addEntity(new Powerup(this.game, this.primaryBody.getCenter().copy(), Powerup.Type.AMMO));
+        }
+
+        // Chance to drop powerups.
+        if (this.rand.nextDouble() < 2.0 / this.game.world.getBodyCount()) {
+            this.game.addEntity(new Powerup(this.game, this.primaryBody.getCenter().copy(), Powerup.Type.INVINCIBLE));
         }
 
         // This destroys the current rock.

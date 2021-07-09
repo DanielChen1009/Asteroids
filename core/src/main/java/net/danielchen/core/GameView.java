@@ -8,6 +8,7 @@ import pythagoras.f.IDimension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class GameView extends GroupLayer {
     private static final float LINE_WIDTH = 2;
@@ -53,11 +54,34 @@ public class GameView extends GroupLayer {
                 message.centered = true;
                 this.textLayer.addText(message);
             }
+            if (!this.game.ship.powerups.isEmpty()) {
+                StringBuffer message = new StringBuffer();
+                for (Map.Entry<Powerup.Type, Integer> entry : this.game.ship.powerups.entrySet()) {
+                    message.append(entry.getKey().message);
+                    if (entry.getKey().showTime) message.append(" (").append(entry.getValue()).append("). ");
+                    else message.append(". ");
+                }
+                Point p = this.game.ship.primaryBody.getCenter();
+                Text text = new Text(message.toString(),
+                        (float) p.x * this.viewSize.width(),
+                        (float) (p.y - 0.035) * this.viewSize.height());
+                text.size = 10;
+                text.centered = true;
+                this.textLayer.addText(text);
+            }
             this.textLayer.showText();
         }
 
         private void paintEntity(Surface surf, Entity entity) {
-            if (entity instanceof Ship) surf.setFillColor(0xFF00FF00);
+            if (entity instanceof Ship) {
+                Ship ship = (Ship) entity;
+                if (!ship.powerups.isEmpty()) {
+                    // If the ship has powerups, paint it a random color from its powerups.
+                    Powerup.Type a = new ArrayList<>(
+                            ship.powerups.keySet()).get(this.game.rand.nextInt(ship.powerups.size()));
+                    surf.setFillColor(a.color);
+                } else surf.setFillColor(0xFF00FF00);
+            }
             else if (entity instanceof Bullet) surf.setFillColor(0xFF2288AA);
             else if (entity instanceof Rock) surf.setFillColor(0xFFAAAAAA);
             else if (entity instanceof Powerup) surf.setFillColor(((Powerup) entity).type.color);

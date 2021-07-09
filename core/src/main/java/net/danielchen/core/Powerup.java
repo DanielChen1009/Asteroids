@@ -4,13 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Powerup extends Entity {
+    // The type of this powerup with associated powerup-specific parameters.
     enum Type {
-        AMMO(0xFF2288AA);
+        AMMO(0xFF2288AA, 20, "+10 ammo", false),
+        INVINCIBLE(0xFFFFFF00, 200, "invincible", true);
 
-        Type(int color) {
+        Type(int color, int time, String message, boolean showTime) {
             this.color = color;
+            this.time = time;
+            this.message = message;
+            this.showTime = showTime;
         }
         int color;
+        int time;
+        String message; // Message to show the user on the UI about this powerup.
+        boolean showTime; // Whether to show the remaining time on the UI.
     }
     private int lifetimeRemaining;
     private double speed;
