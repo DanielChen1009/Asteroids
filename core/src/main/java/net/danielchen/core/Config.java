@@ -19,11 +19,14 @@ public class Config {
     public static float LINE_WIDTH = 2;
 
     // The vertical gap size between the ship's message string and the ship.
-    public static double SHIP_MESSAGE_VERTICAL_OFFSET = 0.038;
+    public static float SHIP_MESSAGE_VERTICAL_OFFSET = 0.038f;
 
     /**
      * Player related config.
      */
+    public static final float SHIP_SIZE = 0.025f;
+    public static final float SHIP_ANGLE = (float) (Math.PI / 3.0);
+
     // The acceleration of the ship when spacebar is pressed/held.
     public static double SHIP_ACCELERATION = 0.0003;
 
@@ -41,21 +44,21 @@ public class Config {
     public static int LOW_AMMO_THRESHOLD = 10;
     public static double LOW_AMMO_SPAWN_RATE = 0.01;
 
-    public static double BULLET_SIZE = 1.0 / 800;
-    public static double BULLET_SPEED = 0.03;
+    public static float BULLET_SIZE = 1.0f / 800;
+    public static float BULLET_SPEED = 0.03f;
     public static int BULLET_LIFETIME = 18;
 
-    public static double MEGABULLET_SIZE = 1.0 / 200;
-    public static double MEGABULLET_SPEED = 0.05;
+    public static float MEGABULLET_SIZE = 1.0f / 200;
+    public static float MEGABULLET_SPEED = 0.05f;
     public static int MEGABULLET_LIFETIME = 30;
 
     public static int MEGAGUN_SHOTS = 5;
-    public static double MEGAGUN_SPREAD = 0.1;
+    public static float MEGAGUN_SPREAD = 0.1f;
 
     /**
      * Powerup related config.
      */
-    public static double POWERUP_SIZE = 0.01;
+    public static float POWERUP_SIZE = 0.01f;
     public static int POWERUP_LIFETIME = 500;
 
     // The distance at which the powerup starts getting attracted towards the

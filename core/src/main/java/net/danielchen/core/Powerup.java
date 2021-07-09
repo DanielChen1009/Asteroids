@@ -1,5 +1,7 @@
 package net.danielchen.core;
 
+import org.jbox2d.common.MathUtils;
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
 import java.util.ArrayList;
@@ -36,16 +38,16 @@ public class Powerup extends Entity {
     private double angle;
     Type type;
 
-    public Powerup(Game game, Point center, Type type) {
+    public Powerup(Game game, Vec2 center, Type type) {
         super("POWERUP", game);
         this.type = type;
-        List<Point> primaryBody = new ArrayList<>();
+        List<Vec2> primaryBody = new ArrayList<>();
         // All powerups are squares.
-        double size = Config.POWERUP_SIZE;
-        primaryBody.add(new Point(-size, -size));
-        primaryBody.add(new Point(-size, size));
-        primaryBody.add(new Point(size, size));
-        primaryBody.add(new Point(size, -size));
+        float size = Config.POWERUP_SIZE;
+        primaryBody.add(new Vec2(-size, -size));
+        primaryBody.add(new Vec2(-size, size));
+        primaryBody.add(new Vec2(size, size));
+        primaryBody.add(new Vec2(size, -size));
         this.setPrimaryBody(new EntityBody(this, game, primaryBody, center));
         this.speed = this.rand.nextGaussian() * 0.001 + 0.005;
         this.angle = this.rand.nextGaussian() * Math.PI * 2.0;
@@ -63,16 +65,16 @@ public class Powerup extends Entity {
         this.angle *= this.rand.nextGaussian() * 0.01 + 1.0;
 
         // Make the powerup attract towards the ship at a certain distance.
-        Point p1 = this.primaryBody.getCenter();
-        Point p2 = this.game.ship.primaryBody.getCenter();
+        Vec2 p1 = this.primaryBody.getCenter();
+        Vec2 p2 = this.game.ship.primaryBody.getCenter();
         if (this.game.ship.isActive() &&
-                p1.distance(p2) < Config.POWERUP_ATTRACT_DISTANCE) {
+                MathUtils.distance(p1, p2) < Config.POWERUP_ATTRACT_DISTANCE) {
             double v = this.rand.nextGaussian() * 0.003 + 0.02;
             this.dx += v * (p2.x - p1.x);
             this.dy += v * (p2.y - p1.y);
         } else {
-            this.dx = this.speed * Math.cos(this.angle);
-            this.dy = this.speed * Math.sin(this.angle);
+            this.dx = (float) (this.speed * Math.cos(this.angle));
+            this.dy = (float) (this.speed * Math.sin(this.angle));
         }
         super.update();
     }

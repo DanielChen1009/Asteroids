@@ -1,5 +1,6 @@
 package net.danielchen.core;
 
+import org.jbox2d.common.Vec2;
 import playn.core.*;
 import playn.scene.GroupLayer;
 import playn.scene.ImageLayer;
@@ -56,9 +57,8 @@ public class GameView extends GroupLayer {
                         this.viewSize.height() / 2);
                 message.centered = true;
                 this.textLayer.addText(message);
-            }
-            if (!this.game.ship.powerups.isEmpty()) {
-                StringBuffer message = new StringBuffer();
+            } else if (!this.game.ship.powerups.isEmpty()) {
+                StringBuilder message = new StringBuilder();
                 for (Map.Entry<Powerup.Type, Integer> entry :
                         this.game.ship.powerups
                                 .entrySet()) {
@@ -69,10 +69,10 @@ public class GameView extends GroupLayer {
                     else
                         message.append(". ");
                 }
-                Point p = this.game.ship.primaryBody.getCenter();
+                Vec2 p = this.game.ship.primaryBody.getCenter();
                 Text text = new Text(message.toString(),
-                        (float) p.x * this.viewSize.width(),
-                        (float) (p.y - Config.SHIP_MESSAGE_VERTICAL_OFFSET) *
+                        p.x * this.viewSize.width(),
+                        (p.y - Config.SHIP_MESSAGE_VERTICAL_OFFSET) *
                                 this.viewSize.height());
                 text.size = 10;
                 text.centered = true;
@@ -114,16 +114,16 @@ public class GameView extends GroupLayer {
             int size = body.getPoints().size();
             for (int i = 0; i < size; ++i) {
                 surf.drawLine(
-                        (float) (body.getCenter().x +
+                        (body.getCenter().x +
                                 body.getPoints().get(i % size).x) *
                                 this.width(),
-                        (float) (body.getCenter().y +
+                        (body.getCenter().y +
                                 body.getPoints().get(i % size).y) *
                                 this.height(),
-                        (float) (body.getCenter().x +
+                        (body.getCenter().x +
                                 body.getPoints().get((i + 1) % size).x) *
                                 this.width(),
-                        (float) (body.getCenter().y +
+                        (body.getCenter().y +
                                 body.getPoints().get((i + 1) % size).y) *
                                 this.height(),
                         Config.LINE_WIDTH);

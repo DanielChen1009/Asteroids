@@ -7,23 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Rock extends Entity {
-    private final Point center;
     private final double size;
     private double rotationSpeed;
     private double speed;
     private int lifetime = Integer.MAX_VALUE;
     boolean isDebris;
 
-    public Rock(Game game, Point center, double size) {
+    public Rock(Game game, Vec2 center, double size) {
         this(game, center, size, false);
     }
 
-    public Rock(Game game, Point center, double size, boolean isDebris) {
+    public Rock(Game game, Vec2 center, double size, boolean isDebris) {
         super("ROCK", game);
-        this.center = center;
         this.size = size;
         this.isDebris = isDebris;
-        this.setPrimaryBody(this.createRock(game));
+        this.setPrimaryBody(this.createRock(game, center));
         this.speed = (this.rand.nextDouble() + 1) * Config.BASE_ROCK_SPEED;
         this.rotationSpeed = (this.rand.nextDouble() + 0.5) * Math.PI / 20;
         this.travelAngle = (float) (this.rand.nextGaussian() * 2.0 * Math.PI);
@@ -33,12 +31,12 @@ public class Rock extends Entity {
         super("ROCK", parent.game);
         this.isDebris = false;
         this.size = parent.size * (this.rand.nextDouble() + 0.5) * 0.5;
-        this.center = parent.primaryBody.getCenter().copy();
-        this.center.x = this.center.x +
+        Vec2 center = parent.primaryBody.getCenter().clone();
+        center.x +=
                 0.2 * this.rand.nextGaussian() * (parent.size + this.size);
-        this.center.y = this.center.y +
+        center.y +=
                 0.2 * this.rand.nextGaussian() * (parent.size + this.size);
-        this.setPrimaryBody(this.createRock(this.game));
+        this.setPrimaryBody(this.createRock(this.game, center));
         this.speed = parent.speed * (this.rand.nextGaussian() * 0.1 + 0.8);
         this.rotationSpeed =
                 parent.rotationSpeed * (this.rand.nextGaussian() * 0.1 + 0.8);
@@ -47,8 +45,8 @@ public class Rock extends Entity {
 
     @Override
     public void update() {
-        this.dx = this.speed * Math.cos(this.travelAngle);
-        this.dy = this.speed * Math.sin(this.travelAngle);
+        this.dx = (float) (this.speed * Math.cos(this.travelAngle));
+        this.dy = (float) (this.speed * Math.sin(this.travelAngle));
         this.rotateBody(this.rotationSpeed);
         super.update();
         if (this.lifetime > 0 && this.lifetime != Integer.MAX_VALUE)
@@ -60,8 +58,8 @@ public class Rock extends Entity {
     /**
      * Creates a rock with randomized body vertices.
      */
-    public EntityBody createRock(Game game) {
-        List<Point> body = new ArrayList<>();
+    public EntityBody createRock(Game game, Vec2 center) {
+        List<Vec2> body = new ArrayList<>();
         int numPoints = this.rand.nextInt(4) + 5;
         double angle = 0;
         for (int i = 0; i < numPoints; ++i) {
@@ -74,9 +72,9 @@ public class Rock extends Entity {
                 radius = this.size / 2;
             double x = Math.cos(angle) * radius;
             double y = Math.sin(angle) * radius;
-            body.add(new Point(x, y));
+            body.add(new Vec2((float) x, (float) y));
         }
-        return new EntityBody(this, game, body, this.center, !this.isDebris);
+        return new EntityBody(this, game, body, center.clone(), !this.isDebris);
     }
 
     @Override
@@ -124,7 +122,8 @@ public class Rock extends Entity {
         int numDebris = this.rand.nextInt(3) + 3;
         for (int i = 0; i < numDebris; i++) {
             Rock debris = new Rock(this.game,
-                    this.primaryBody.getCenter().copy(), this.size * 0.1, true);
+                    this.primaryBody.getCenter().clone(), this.size * 0.1,
+                    true);
             debris.lifetime = 5 + (int) (this.rand.nextGaussian() * 2);
             debris.speed = 0.02 + this.rand.nextGaussian() * 0.01;
             this.game.addEntity(debris);
@@ -147,7 +146,7 @@ public class Rock extends Entity {
                     powerup.spawnRate / this.game.world.getBodyCount()) {
                 this.game.addEntity(
                         new Powerup(this.game,
-                                this.primaryBody.getCenter().copy(),
+                                this.primaryBody.getCenter().clone(),
                                 powerup));
             }
         }

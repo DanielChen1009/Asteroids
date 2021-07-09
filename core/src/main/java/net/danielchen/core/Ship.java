@@ -1,29 +1,33 @@
 package net.danielchen.core;
 
 import net.danielchen.core.Powerup.Type;
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
 import java.util.*;
 
 public class Ship extends Entity {
-    private static final double SIZE = 0.025;
-    private static final double ANGLE = Math.PI / 3;
     double acceleration;
     boolean turningLeft, turningRight;
     // Map from powerup type to how much time of that powerup is remaining.
     Map<Type, Integer> powerups;
     int ammo = Config.INITIAL_AMMO;
 
-    public Ship(Game game, Point center) {
+    public Ship(Game game, Vec2 center) {
         super("SHIP", game);
         this.powerups = new HashMap<>();
         this.setPrimaryBody(
                 new EntityBody(this, game, new ArrayList<>(Arrays.asList(
-                        new Point(4 * SIZE / 5, 0),
-                        new Point(SIZE * Math.sin(4 * ANGLE),
-                                SIZE * Math.cos(4 * ANGLE)),
-                        new Point(SIZE * Math.sin(-ANGLE),
-                                SIZE * Math.cos(-ANGLE)))), center));
+                        new Vec2(4 * Config.SHIP_SIZE / 5, 0),
+                        new Vec2((float) (Config.SHIP_SIZE *
+                                Math.sin(4 * Config.SHIP_ANGLE)),
+                                (float) (Config.SHIP_SIZE *
+                                        Math.cos(4 * Config.SHIP_ANGLE))),
+                        new Vec2((float) (Config.SHIP_SIZE *
+                                Math.sin(-Config.SHIP_ANGLE)),
+                                (float) (Config.SHIP_SIZE *
+                                        Math.cos(-Config.SHIP_ANGLE))))),
+                        center));
     }
 
     @Override
@@ -95,10 +99,10 @@ public class Ship extends Entity {
             int numBullets = this.rand.nextInt(20) + 20;
             for (int i = 0; i < numBullets; i++) {
                 this.game.addEntity(new Bullet(this.game,
-                        this.primaryBody.getCenter().copy(),
-                        i * ((this.rand.nextDouble() + 1) * Math.PI /
-                                numBullets),
-                        Config.BULLET_SPEED * this.rand.nextDouble()));
+                        this.primaryBody.getCenter().clone(),
+                        (float) (i * ((this.rand.nextFloat() + 1) * Math.PI /
+                                numBullets)),
+                        Config.BULLET_SPEED * this.rand.nextFloat()));
             }
         }
     }

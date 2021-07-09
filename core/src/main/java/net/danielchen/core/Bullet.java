@@ -1,5 +1,6 @@
 package net.danielchen.core;
 
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
 import java.util.ArrayList;
@@ -9,32 +10,32 @@ public class Bullet extends Entity {
     private int lifetimeRemaining;
     static int cooldown = 0;
 
-    public Bullet(Game game, Point center, double angle, double speed) {
+    public Bullet(Game game, Vec2 center, float angle, float speed) {
         super("BULLET", game);
-        List<Point> primaryBody = new ArrayList<>();
-        primaryBody.add(new Point(Config.BULLET_SIZE, 0));
-        primaryBody.add(new Point(-Config.BULLET_SIZE, 0));
-        primaryBody.add(new Point(0, Config.BULLET_SIZE));
-        primaryBody.add(new Point(0, -Config.BULLET_SIZE));
+        List<Vec2> primaryBody = new ArrayList<>();
+        primaryBody.add(new Vec2(Config.BULLET_SIZE, 0));
+        primaryBody.add(new Vec2(-Config.BULLET_SIZE, 0));
+        primaryBody.add(new Vec2(0, Config.BULLET_SIZE));
+        primaryBody.add(new Vec2(0, -Config.BULLET_SIZE));
         this.setPrimaryBody(new EntityBody(this, game, primaryBody, center));
-        this.dx = speed * Math.cos(angle);
-        this.dy = speed * Math.sin(angle);
+        this.dx = (float) (speed * Math.cos(angle));
+        this.dy = (float) (speed * Math.sin(angle));
         this.lifetimeRemaining = Config.BULLET_LIFETIME;
     }
 
     /**
      * This constructor is for Mega bullet.
      */
-    public Bullet(Game game, Point center, double angle) {
+    public Bullet(Game game, Vec2 center, float angle) {
         super("BULLET", game);
-        List<Point> primaryBody = new ArrayList<>();
-        primaryBody.add(new Point(Config.MEGABULLET_SIZE, 0));
-        primaryBody.add(new Point(-Config.MEGABULLET_SIZE, 0));
-        primaryBody.add(new Point(0, Config.MEGABULLET_SIZE));
-        primaryBody.add(new Point(0, -Config.MEGABULLET_SIZE));
+        List<Vec2> primaryBody = new ArrayList<>();
+        primaryBody.add(new Vec2(Config.MEGABULLET_SIZE, 0));
+        primaryBody.add(new Vec2(-Config.MEGABULLET_SIZE, 0));
+        primaryBody.add(new Vec2(0, Config.MEGABULLET_SIZE));
+        primaryBody.add(new Vec2(0, -Config.MEGABULLET_SIZE));
         this.setPrimaryBody(new EntityBody(this, game, primaryBody, center));
-        this.dx = Config.MEGABULLET_SPEED * Math.cos(angle);
-        this.dy = Config.MEGABULLET_SPEED * Math.sin(angle);
+        this.dx = Config.MEGABULLET_SPEED * (float) Math.cos(angle);
+        this.dy = Config.MEGABULLET_SPEED * (float) Math.sin(angle);
         this.lifetimeRemaining = Config.MEGABULLET_LIFETIME;
     }
 

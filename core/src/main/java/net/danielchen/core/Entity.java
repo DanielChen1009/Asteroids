@@ -9,41 +9,41 @@ import java.util.*;
 enum Edge {
     NONE(0, 0), LEFT(1, 0), RIGHT(-1, 0), UP(0, 1), DOWN(0, -1);
 
-    double dx;
-    double dy;
+    float dx;
+    float dy;
 
-    Edge(double dx, double dy) {
+    Edge(float dx, float dy) {
         this.dx = dx;
         this.dy = dy;
     }
 }
 
 class EntityBody {
-    private final List<Point> model;
-    private final List<Point> points;
+    private final List<Vec2> model;
+    private final List<Vec2> points;
     private final Game game;
     private final World world;
     private final Body body;
     private final Entity entity;
 
-    private Point center;
+    private Vec2 center;
     private float angle;
-    private boolean physicsEnabled;
+    private final boolean physicsEnabled;
 
-    public EntityBody(Entity entity, Game game, List<Point> points,
-                      Point center) {
+    public EntityBody(Entity entity, Game game, List<Vec2> points,
+                      Vec2 center) {
         this(entity, game, points, center, true);
     }
 
-    public EntityBody(Entity entity, Game game, List<Point> points,
-                      Point center, boolean physicsEnabled) {
+    public EntityBody(Entity entity, Game game, List<Vec2> points,
+                      Vec2 center, boolean physicsEnabled) {
         this.entity = entity;
         this.game = game;
         this.world = game.world;
         this.model = points;
         this.points = new ArrayList<>();
-        for (Point point : this.model) {
-            this.points.add(point.copy());
+        for (Vec2 point : this.model) {
+            this.points.add(point.clone());
         }
         this.center = center;
         this.angle = 0;
@@ -58,14 +58,14 @@ class EntityBody {
             PolygonShape polygonShape = new PolygonShape();
             Vec2[] polygon = new Vec2[points.size()];
             for (int i = 0; i < points.size(); ++i) {
-                Point point = points.get(i);
-                polygon[i] = new Vec2((float) point.x, (float) point.y);
+                Vec2 point = points.get(i);
+                polygon[i] = new Vec2(point.x, point.y);
             }
             polygonShape.set(polygon, polygon.length);
             fixtureDef.shape = polygonShape;
             fixtureDef.restitution = 1f;
             this.body.createFixture(fixtureDef);
-            this.body.setTransform(new Vec2((float) center.x, (float) center.y),
+            this.body.setTransform(new Vec2(center.x, center.y),
                     this.angle);
 
             game.bodyMap.put(this.body, entity);
@@ -74,14 +74,12 @@ class EntityBody {
     }
 
     void wrap(Edge edge) {
-        Point p = this.center.copy();
-        p.add(new Point(edge.dx, edge.dy));
-        this.moveTo(p, this.angle);
+        this.moveTo(this.center.add(new Vec2(edge.dx, edge.dy)), this.angle);
     }
 
     public Set<Edge> getOutOfBounds() {
         Set<Edge> edges = new HashSet<>();
-        for (Point p : this.points) {
+        for (Vec2 p : this.points) {
             if (this.center.x + p.x > 1)
                 edges.add(Edge.RIGHT);
             if (this.center.x + p.x < 0)
@@ -96,30 +94,34 @@ class EntityBody {
 
     EntityBody copy() {
         return new EntityBody(this.entity, this.game,
-                new ArrayList<>(this.model), this.center.copy(),
+                new ArrayList<>(this.model), this.center.clone(),
                 this.physicsEnabled);
     }
 
-    public List<Point> getPoints() {
+    public List<Vec2> getPoints() {
         return this.points;
     }
 
-    public Point getCenter() {
+    public Vec2 getCenter() {
         return this.center;
     }
 
-    void moveTo(Point point, float angle) {
-        this.center = point.copy();
+    void moveTo(Vec2 point, float angle) {
+        this.center = point.clone();
         this.angle = angle;
         for (int i = 0; i < this.model.size(); ++i) {
-            Point p = this.points.get(i);
-            Point modelP = this.model.get(i);
-            p.x = modelP.x * Math.cos(angle) - modelP.y * Math.sin(angle);
-            p.y = modelP.y * Math.cos(angle) + modelP.x * Math.sin(angle);
+            Vec2 p = this.points.get(i);
+            Vec2 modelP = this.model.get(i);
+            p.x =
+                    (float) (modelP.x * Math.cos(angle) -
+                            modelP.y * Math.sin(angle));
+            p.y =
+                    (float) (modelP.y * Math.cos(angle) +
+                            modelP.x * Math.sin(angle));
         }
         if (this.body != null) {
             this.body.setTransform(
-                    new Vec2((float) this.center.x, (float) this.center.y),
+                    new Vec2(this.center.x, this.center.y),
                     angle);
         }
     }
@@ -148,8 +150,9 @@ public class Entity {
     protected Map<Set<Edge>, EntityBody> wrapBodies;
 
     // traveling and orientation variables.
-    double dx;
-    double dy;
+    float dx;
+    float dy;
+
     // units of the angles are radians.
     float travelAngle;
     float bodyAngle;
@@ -201,13 +204,12 @@ public class Entity {
             }
         }
 
-        Point p = this.primaryBody.getCenter().copy();
-        p.add(new Point(this.dx, this.dy));
-        this.primaryBody.moveTo(p, this.bodyAngle);
+        this.primaryBody.moveTo(this.primaryBody.getCenter()
+                .add(new Vec2(this.dx, this.dy)), this.bodyAngle);
         for (EntityBody wrapBody : this.wrapBodies.values()) {
-            Point p1 = wrapBody.getCenter().copy();
-            p1.add(new Point(this.dx, this.dy));
-            wrapBody.moveTo(p1, this.bodyAngle);
+            wrapBody.moveTo(
+                    wrapBody.getCenter().add(new Vec2(this.dx, this.dy)),
+                    this.bodyAngle);
         }
     }
 

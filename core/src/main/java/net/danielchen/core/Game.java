@@ -44,7 +44,7 @@ public class Game implements ContactListener {
         this.world.setAutoClearForces(true);
         this.world.setContactListener(this);
 
-        Point startPoint = new Point(0.5, 0.5);
+        Vec2 startPoint = new Vec2(0.5f, 0.5f);
         this.isFiring = false;
         this.ship = new Ship(this, startPoint);
         this.addEntity(this.ship);
@@ -63,9 +63,9 @@ public class Game implements ContactListener {
     public void update() {
         // Continuously spawn rocks, raising the limit as the score goes up.
         while (this.numRocks < this.score * Config.SPAWN_RATE + 2) {
-            Point point = this.rand.nextDouble() < 0.5 ? new Point(
-                    this.rand.nextDouble(), 1) : new Point(1,
-                    this.rand.nextDouble());
+            Vec2 point = this.rand.nextDouble() < 0.5 ? new Vec2(
+                    this.rand.nextFloat(), 1) : new Vec2(1,
+                    this.rand.nextFloat());
             Rock rock = new Rock(this, point,
                     this.rand.nextGaussian() * Config.BASE_ROCK_SIZE / 10 +
                             Config.BASE_ROCK_SIZE);
@@ -90,8 +90,8 @@ public class Game implements ContactListener {
         // Manage ship firing logic.
         if (this.ship.isActive() && this.ship.ammo > 0) {
             if (this.isFiring && Bullet.cooldown == 0) {
-                Point bulletLoc = this.ship.primaryBody.getCenter().copy();
-                bulletLoc.add(this.ship.primaryBody.getPoints().get(0));
+                Vec2 bulletLoc = this.ship.primaryBody.getCenter()
+                        .add(this.ship.primaryBody.getPoints().get(0));
                 if (this.ship.powerups.containsKey(Powerup.Type.MEGAGUN)) {
                     for (int i = -Config.MEGAGUN_SHOTS / 2;
                          i <= Config.MEGAGUN_SHOTS / 2; i++) {
@@ -116,9 +116,9 @@ public class Game implements ContactListener {
         if (this.ship.isActive() &&
                 this.ship.ammo < Config.LOW_AMMO_THRESHOLD &&
                 this.rand.nextDouble() < Config.LOW_AMMO_SPAWN_RATE) {
-            Point point = this.rand.nextDouble() < 0.5 ? new Point(
-                    this.rand.nextDouble(), 1) : new Point(1,
-                    this.rand.nextDouble());
+            Vec2 point = this.rand.nextDouble() < 0.5 ? new Vec2(
+                    this.rand.nextFloat(), 1) : new Vec2(1,
+                    this.rand.nextFloat());
             this.addEntity(new Powerup(this, point, Powerup.Type.AMMO));
         }
 
