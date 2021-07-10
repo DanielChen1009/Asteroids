@@ -13,6 +13,8 @@ public class Ship extends Entity {
     int ammo = Config.INITIAL_AMMO;
     int cooldown = Config.COOLDOWN;
     int extraLives = 0;
+    float pointerTurn = Float.NaN;
+    float pointerDistance = Float.NaN;
 
     public Ship(Game game, Vec2 center) {
         super(Type.SHIP, game);
@@ -32,12 +34,22 @@ public class Ship extends Entity {
     @Override
     public void update() {
         // Manage movement forces.
-        if (this.turningLeft)
-            this.setAngularVelocity(-Config.SHIP_TURN_SPEED);
-        if (this.turningRight)
-            this.setAngularVelocity(Config.SHIP_TURN_SPEED);
-        if (!this.turningLeft && !this.turningRight)
-            this.setAngularVelocity(0);
+        if (Float.isNaN(this.pointerTurn)) {
+            if (this.turningLeft)
+                this.setAngularVelocity(-Config.SHIP_TURN_SPEED);
+            if (this.turningRight)
+                this.setAngularVelocity(Config.SHIP_TURN_SPEED);
+            if (!this.turningLeft && !this.turningRight)
+                this.setAngularVelocity(0);
+        }
+        else {
+            this.setAngularVelocity(
+                    Config.SHIP_POINTER_TURN_SPEED * this.pointerTurn);
+        }
+        if (!Float.isNaN(this.pointerDistance)) {
+            this.acceleration =
+                    Config.SHIP_POINTER_ACCELERATION * this.pointerDistance;
+        }
         if (this.acceleration > 0) {
             float fx = (float) (this.acceleration * Math
                     .cos(this.primaryBody.getAngle()));
@@ -64,6 +76,7 @@ public class Ship extends Entity {
     }
 
     public void accelerate(double a) {
+        this.pointerDistance = Float.NaN;
         this.acceleration = a;
     }
 

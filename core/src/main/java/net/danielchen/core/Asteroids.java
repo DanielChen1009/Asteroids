@@ -5,11 +5,13 @@ import playn.core.Keyboard;
 import playn.core.Platform;
 import playn.core.Surface;
 import playn.scene.Layer;
+import playn.scene.Pointer;
 import playn.scene.SceneGame;
 import pythagoras.f.IDimension;
 
 public class Asteroids extends SceneGame {
     private final Game game;
+    private final Pointer pointer;
 
     public Asteroids(Platform plat) {
         super(plat, 50); // update our "simulation" 50ms (20 times per second)
@@ -50,6 +52,8 @@ public class Asteroids extends SceneGame {
 
         // Creates and add a game view for asteroids objects.
         this.rootLayer.addAt(new GameView(this.game, plat), 0, 0);
+
+        this.pointer = new Pointer(plat, this.rootLayer, true);
     }
 
     @Override

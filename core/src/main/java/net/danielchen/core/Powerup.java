@@ -52,7 +52,8 @@ public class Powerup extends Entity {
         this.setPrimaryBody(new EntityBody(this, game, primaryBody, center));
         this.speed = this.rand
                 .nextGaussian() * Config.BASE_POWERUP_SPEED / 10 + Config.BASE_POWERUP_SPEED;
-        this.angle = this.rand.nextGaussian() * Math.PI * 2.0;
+        this.angle = this.game.ship.primaryBody.getAngle() + this.rand
+                .nextGaussian() * Math.PI / 4;
         this.lifetimeRemaining = Config.POWERUP_LIFETIME;
     }
 

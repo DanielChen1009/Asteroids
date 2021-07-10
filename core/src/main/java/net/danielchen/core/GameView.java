@@ -5,6 +5,7 @@ import playn.core.*;
 import playn.scene.GroupLayer;
 import playn.scene.ImageLayer;
 import playn.scene.Layer;
+import playn.scene.Pointer;
 import pythagoras.f.IDimension;
 
 import java.util.ArrayList;
@@ -13,10 +14,43 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class GameView extends GroupLayer {
+    private final Platform plat;
+
     public GameView(Game game, Platform plat) {
+        this.plat = plat;
         TextLayer textLayer = new TextLayer(plat);
         this.addAt(new GameLayer(game, plat, textLayer), 0, 0);
         this.addAt(textLayer, 0, 0);
+
+        this.events().connect(new Pointer.Listener() {
+            @Override
+            public void onStart(Pointer.Interaction event) {
+                game.processPointerStart(event.x() / GameView.this.width(),
+                        event.y() / GameView.this.height());
+            }
+
+            @Override
+            public void onEnd(Pointer.Interaction event) {
+                game.processPointerEnd(event.x() / GameView.this.width(),
+                        event.y() / GameView.this.height());
+            }
+
+            @Override
+            public void onDrag(Pointer.Interaction event) {
+                game.processPointerDrag(event.x() / GameView.this.width(),
+                        event.y() / GameView.this.height());
+            }
+        });
+    }
+
+    @Override
+    public float width() {
+        return this.plat.graphics().viewSize.width();
+    }
+
+    @Override
+    public float height() {
+        return this.plat.graphics().viewSize.height();
     }
 
     static class GameLayer extends Layer {
@@ -48,9 +82,9 @@ public class GameView extends GroupLayer {
             surf.fillRect(0, 0, this.width(), this.height());
             for (Entity entity : this.game.getEntities())
                 this.paintEntity(surf, entity);
-            this.textLayer.addText(new Text(
-                    "Press ESC to restart. Score: " + this.game
-                            .score() + " Ammo: " + this.game.ship.ammo, 0, 0));
+            this.textLayer.addText(new Text("Score: " + this.game
+                    .score() + " Ammo: " + this.game.ship.ammo + " - Press " + "ESC " + "to restart",
+                    5, 5));
             if (!this.game.ship.active) {
                 Text message = new Text("GAME OVER", this.viewSize.width() / 2,
                         this.viewSize.height() / 2);
@@ -59,6 +93,12 @@ public class GameView extends GroupLayer {
             }
             else {
                 StringBuilder message = new StringBuilder();
+                if (this.game.ship.ammo <= 0) {
+                    message.append("Out of ammo! ");
+                }
+                else if (this.game.ship.ammo < Config.LOW_AMMO_THRESHOLD) {
+                    message.append("Low ammo! ");
+                }
                 if (this.game.ship.extraLives > 0) {
                     message.append("Extra lives: ")
                             .append(this.game.ship.extraLives).append(". ");

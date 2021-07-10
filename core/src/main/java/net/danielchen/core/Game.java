@@ -3,6 +3,7 @@ package net.danielchen.core;
 import org.jbox2d.callbacks.ContactImpulse;
 import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
+import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
@@ -23,6 +24,8 @@ public class Game implements ContactListener {
     final Map<Body, Entity> bodyMap;
     int score;
     int numRocks;
+    int pointerDuration;
+    boolean pointerFire;
 
     public Game() {
         this.rand = new Random();
@@ -62,8 +65,11 @@ public class Game implements ContactListener {
     public void update() {
         this.processContacts();
 
+        if (this.pointerDuration >= 0)
+            this.pointerDuration++;
+
         // Continuously spawn rocks, raising the limit as the score goes up.
-        while (this.numRocks < this.score * Config.SPAWN_RATE + 2) {
+        while (this.numRocks < this.score * Config.SPAWN_RATE + Config.SPAWN_INITIAL && this.numRocks < Config.MAX_ROCKS) {
             Vec2 point = this.rand.nextDouble() < 0.5 ?
                     new Vec2(this.rand.nextFloat(), 1) :
                     new Vec2(1, this.rand.nextFloat());
@@ -90,22 +96,24 @@ public class Game implements ContactListener {
 
         // Manage ship firing logic.
         if (this.ship.active && this.ship.ammo > 0) {
-            if (this.isFiring && this.ship.cooldown == 0) {
+            if ((this.isFiring || this.pointerFire) && this.ship.cooldown == 0) {
                 Vec2 bulletLoc = this.ship.primaryBody.getCenter().clone();
                 if (this.ship.powerups.containsKey(Powerup.Type.MEGAGUN)) {
                     for (int i = -Config.MEGAGUN_SHOTS / 2;
                          i <= Config.MEGAGUN_SHOTS / 2; i++) {
                         this.addEntity(new Bullet(this, bulletLoc,
-                                                  this.ship.primaryBody
-                                                          .getAngle() + Config.MEGAGUN_SPREAD * i));
+                                this.ship.primaryBody
+                                        .getAngle() + Config.MEGAGUN_SPREAD * i));
                     }
                 }
                 else
                     this.addEntity(new Bullet(this, bulletLoc,
-                                              this.ship.primaryBody.getAngle(),
-                                              Config.BULLET_SPEED));
+                            this.ship.primaryBody.getAngle(),
+                            Config.BULLET_SPEED));
                 this.ship.cooldown = Config.COOLDOWN;
                 this.ship.ammo--;
+                if (this.pointerFire)
+                    this.pointerFire = false;
             }
             if (this.ship.cooldown > 0)
                 this.ship.cooldown--;
@@ -152,6 +160,27 @@ public class Game implements ContactListener {
         this.ship.turningRight = turningRight;
     }
 
+    public void processPointerStart(float x, float y) {
+        this.pointerDuration = 0;
+    }
+
+    public void processPointerEnd(float x, float y) {
+        if (this.pointerDuration >= 0 && this.pointerDuration < 5)
+            this.pointerFire = true;
+        this.pointerDuration = -1;
+        this.ship.pointerTurn = Float.NaN;
+        this.ship.pointerDistance = 0;
+    }
+
+    public void processPointerDrag(float x, float y) {
+        this.pointerDuration = -1;
+        Vec2 p = this.ship.primaryBody.getCenter();
+        float angle = (float) Math.atan2(y - p.y, x - p.x);
+        float dA = angle - this.ship.primaryBody.getAngle();
+        this.ship.pointerTurn = (float) Math.atan2(Math.sin(dA), Math.cos(dA));
+        this.ship.pointerDistance = MathUtils.distance(p, new Vec2(x, y));
+    }
+
     public List<Entity> getEntities() {
         return this.entities;
     }
@@ -172,10 +201,10 @@ public class Game implements ContactListener {
             if (entityA == null || entityB == null)
                 return;
             if (this.contacts.containsKey(new Pair<>(contact.m_fixtureA.m_body,
-                                                     contact.m_fixtureB.m_body)))
+                    contact.m_fixtureB.m_body)))
                 return;
             this.contacts.put(new Pair<>(contact.m_fixtureA.m_body,
-                                         contact.m_fixtureB.m_body), contact);
+                    contact.m_fixtureB.m_body), contact);
         }
     }
 

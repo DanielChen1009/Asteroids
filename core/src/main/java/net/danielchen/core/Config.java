@@ -33,6 +33,12 @@ public class Config {
     // The turn speed of the ship when arrow keys are pressed/held.
     public static float SHIP_TURN_SPEED = 250;
 
+    // The acceleration of the ship when mouse/touch is pressed/held.
+    public static float SHIP_POINTER_ACCELERATION = 200;
+
+    // The turn speed of the ship when mouse/touch is pressed/held.
+    public static float SHIP_POINTER_TURN_SPEED = 400;
+
     // The amount of ammo the player starts with.
     public static int INITIAL_AMMO = 100;
 
@@ -63,8 +69,8 @@ public class Config {
      */
     public static float POWERUP_SIZE = 0.01f;
     public static int POWERUP_LIFETIME = 500;
-    public static float BASE_POWERUP_SPEED = 1;
-    public static float MAX_POWERUP_SPEED = 30;
+    public static float BASE_POWERUP_SPEED = 3;
+    public static float MAX_POWERUP_SPEED = 6;
 
     // The distance at which the powerup starts getting attracted towards the
     // player ship.
@@ -86,6 +92,9 @@ public class Config {
     /**
      * Entity generation related config.
      */
+    // The number of initial rocks.
+    public static int SPAWN_INITIAL = 3;
+
     // The higher this number is, the more rocks/stuff will spawn over time.
     public static double SPAWN_RATE = 0.03;
 
@@ -110,6 +119,9 @@ public class Config {
     // The minimum size a rock can be in order to spawn smaller rocks upon
     // being shot.
     public static double MIN_ROCK_BREAK_UP_SIZE = 0.05;
+
+    // The maximum number of rocks that should exist on-screen.
+    public static int MAX_ROCKS = 50;
 
     // How long debris from broke rocks stay on-screen.
     public static int DEBRIS_LIFETIME = 20;

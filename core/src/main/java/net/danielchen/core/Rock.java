@@ -105,8 +105,8 @@ public class Rock extends Entity {
         int numDebris = this.rand.nextInt(4) + 3;
         for (int i = 0; i < numDebris; i++) {
             Rock debris = new Rock(this.game,
-                                   this.primaryBody.getCenter().clone(),
-                                   this.size * 0.1, true);
+                    this.primaryBody.getCenter().clone(), this.size * 0.1,
+                    true);
             debris.lifetime = Config.DEBRIS_LIFETIME + (int) (this.rand
                     .nextGaussian() * Config.DEBRIS_LIFETIME / 5);
             debris.speed = this.primaryBody.getLinearVelocity()
@@ -117,10 +117,10 @@ public class Rock extends Entity {
 
         // Spawn some smaller rocks to simulate breaking up the bigger rock.
         if (this.size > Config.MIN_ROCK_BREAK_UP_SIZE) {
-            int numChildren = this.rand.nextInt(2) + 1;
+            int numChildren = this.rand.nextInt(3) + 2;
             for (int i = 0; i < numChildren; i++) {
-                Rock child = new Rock(this, other, this.rand
-                        .nextGaussian() * Math.PI * 0.5 * i);
+                Rock child = new Rock(this, other,
+                        this.rand.nextGaussian() * Math.PI * 0.5 * i);
                 this.game.addEntity(child);
             }
         }
@@ -128,11 +128,10 @@ public class Rock extends Entity {
         // Chance to drop powerups for the player, which decreases as the number
         // of total game objects increase.
         for (Powerup.Type powerup : Powerup.Type.values()) {
-            if (this.rand.nextDouble() < powerup.spawnRate / this.game.world
-                    .getBodyCount()) {
+            if (this.rand.nextDouble() < powerup.spawnRate / Math
+                    .pow(this.game.world.getBodyCount(), 0.7)) {
                 this.game.addEntity(new Powerup(this.game,
-                                                this.primaryBody.getCenter()
-                                                        .clone(), powerup));
+                        this.primaryBody.getCenter().clone(), powerup));
             }
         }
 
