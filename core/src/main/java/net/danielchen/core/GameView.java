@@ -82,6 +82,7 @@ public class GameView extends GroupLayer {
         }
 
         private void paintEntity(Surface surf, Entity entity) {
+            surf.setAlpha(1f);
             if (entity instanceof Ship) {
                 Ship ship = (Ship) entity;
                 if (!ship.powerups.isEmpty()) {

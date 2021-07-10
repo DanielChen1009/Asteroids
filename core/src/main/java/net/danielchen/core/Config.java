@@ -64,7 +64,7 @@ public class Config {
     public static float POWERUP_SIZE = 0.01f;
     public static int POWERUP_LIFETIME = 500;
     public static float BASE_POWERUP_SPEED = 1;
-    public static float MAX_POWERUP_SPEED = 50;
+    public static float MAX_POWERUP_SPEED = 30;
 
     // The distance at which the powerup starts getting attracted towards the
     // player ship.
