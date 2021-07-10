@@ -4,7 +4,7 @@ public class Config {
     /**
      * For debugging purposes only.
      */
-    public static boolean GOD_MODE = true;
+    public static boolean GOD_MODE = false;
 
     /**
      * GUI related config.

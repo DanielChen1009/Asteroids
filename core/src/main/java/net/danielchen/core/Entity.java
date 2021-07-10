@@ -158,6 +158,7 @@ public class Entity {
         int category; // For FixtureDef's filter category and maskBits.
     }
 
+    
     // The type of this entity, with type-specific metadata.
     public Type type;
 
