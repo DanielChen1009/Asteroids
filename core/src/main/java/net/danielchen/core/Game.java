@@ -161,10 +161,14 @@ public class Game implements ContactListener {
 
     public void processPointerStart(float x, float y) {
         this.pointerDuration = 0;
+        // We don't have ESC key on touch devices so we'll say any touch while
+        // game over restarts the game.
+        if (!this.ship.active)
+            this.restart();
     }
 
     public void processPointerEnd(float x, float y) {
-        if (this.pointerDuration >= 0 && this.pointerDuration < 5)
+        if (this.pointerDuration >= 0 && this.pointerDuration < 8)
             this.pointerFire = true;
         this.pointerDuration = -1;
         this.ship.pointerTurn = Float.NaN;
