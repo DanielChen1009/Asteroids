@@ -16,7 +16,7 @@ public class Game implements ContactListener {
     // Jbox2d object containing physics world for collision detection.
     World world;
     private final List<Entity> entities;
-    private final Map<Pair<Body, Body>, ContactData> contacts;
+    private final Map<Pair<Body, Body>, Contact> contacts;
     private boolean isFiring;
 
     final Random rand;
@@ -44,9 +44,8 @@ public class Game implements ContactListener {
         this.world.setAutoClearForces(true);
         this.world.setContactListener(this);
 
-        Vec2 startPoint = new Vec2(0.5f, 0.5f);
         this.isFiring = false;
-        this.ship = new Ship(this, startPoint);
+        this.ship = new Ship(this, new Vec2(0.5f, 0.5f));
         this.addEntity(this.ship);
 
         if (Config.GOD_MODE) {
@@ -61,14 +60,15 @@ public class Game implements ContactListener {
     }
 
     public void update() {
+        this.processContacts();
+
         // Continuously spawn rocks, raising the limit as the score goes up.
         while (this.numRocks < this.score * Config.SPAWN_RATE + 2) {
-            Vec2 point = this.rand.nextDouble() < 0.5 ? new Vec2(
-                    this.rand.nextFloat(), 1) : new Vec2(1,
-                    this.rand.nextFloat());
-            Rock rock = new Rock(this, point,
-                    this.rand.nextGaussian() * Config.BASE_ROCK_SIZE / 10 +
-                            Config.BASE_ROCK_SIZE);
+            Vec2 point = this.rand.nextDouble() < 0.5 ?
+                    new Vec2(this.rand.nextFloat(), 1) :
+                    new Vec2(1, this.rand.nextFloat());
+            Rock rock = new Rock(this, point, this.rand
+                    .nextGaussian() * Config.BASE_ROCK_SIZE / 10 + Config.BASE_ROCK_SIZE);
             this.addEntity(rock);
             this.numRocks++;
         }
@@ -80,73 +80,54 @@ public class Game implements ContactListener {
             Entity entity = itr.next();
             if (entity instanceof Rock && !((Rock) entity).isDebris)
                 this.numRocks++;
-            if (!entity.isActive()) {
+            if (!entity.active) {
                 entity.destroy();
                 itr.remove();
-            } else
+            }
+            else
                 entity.update();
         }
 
         // Manage ship firing logic.
-        if (this.ship.isActive() && this.ship.ammo > 0) {
-            if (this.isFiring && Bullet.cooldown == 0) {
-                Vec2 bulletLoc = this.ship.primaryBody.getCenter()
-                        .add(this.ship.primaryBody.getPoints().get(0));
+        if (this.ship.active && this.ship.ammo > 0) {
+            if (this.isFiring && this.ship.cooldown == 0) {
+                Vec2 bulletLoc = this.ship.primaryBody.getCenter().clone();
                 if (this.ship.powerups.containsKey(Powerup.Type.MEGAGUN)) {
                     for (int i = -Config.MEGAGUN_SHOTS / 2;
                          i <= Config.MEGAGUN_SHOTS / 2; i++) {
-                        this.addEntity(
-                                new Bullet(this, bulletLoc,
-                                        this.ship.bodyAngle +
-                                                Config.MEGAGUN_SPREAD * i
-                                ));
+                        this.addEntity(new Bullet(this, bulletLoc,
+                                                  this.ship.primaryBody
+                                                          .getAngle() + Config.MEGAGUN_SPREAD * i));
                     }
-                } else
-                    this.addEntity(
-                            new Bullet(this, bulletLoc, this.ship.bodyAngle,
-                                    Config.BULLET_SPEED));
-                Bullet.cooldown = Config.COOLDOWN;
+                }
+                else
+                    this.addEntity(new Bullet(this, bulletLoc,
+                                              this.ship.primaryBody.getAngle(),
+                                              Config.BULLET_SPEED));
+                this.ship.cooldown = Config.COOLDOWN;
                 this.ship.ammo--;
             }
-            if (Bullet.cooldown > 0)
-                Bullet.cooldown--;
+            if (this.ship.cooldown > 0)
+                this.ship.cooldown--;
         }
 
         // Spawn ammo occasionally if the player is low.
-        if (this.ship.isActive() &&
-                this.ship.ammo < Config.LOW_AMMO_THRESHOLD &&
-                this.rand.nextDouble() < Config.LOW_AMMO_SPAWN_RATE) {
-            Vec2 point = this.rand.nextDouble() < 0.5 ? new Vec2(
-                    this.rand.nextFloat(), 1) : new Vec2(1,
-                    this.rand.nextFloat());
+        if (this.ship.active && this.ship.ammo < Config.LOW_AMMO_THRESHOLD && this.rand
+                .nextDouble() < Config.LOW_AMMO_SPAWN_RATE) {
+            Vec2 point = this.rand.nextDouble() < 0.5 ?
+                    new Vec2(this.rand.nextFloat(), 1) :
+                    new Vec2(1, this.rand.nextFloat());
             this.addEntity(new Powerup(this, point, Powerup.Type.AMMO));
         }
 
-        this.world.step(Config.WORLD_STEP_DT, 0, 0);
-        this.processContacts();
-    }
-
-    static class ContactData {
-        Contact contact;
-        int delay;
-
-        public ContactData(Contact contact, int delay) {
-            this.contact = contact;
-            this.delay = delay;
-        }
+        this.world.step(Config.WORLD_STEP_DT, 100, 100);
     }
 
     public void processContacts() {
-        Iterator<Map.Entry<Pair<Body, Body>, ContactData>> iterator =
-                this.contacts
-                        .entrySet().iterator();
+        Iterator<Map.Entry<Pair<Body, Body>, Contact>> iterator = this.contacts
+                .entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<Pair<Body, Body>, ContactData> entry = iterator.next();
-            if (entry.getValue().delay > 0 &&
-                    this.contacts.size() < Config.MAX_CONTACTS_FOR_DELAY) {
-                entry.getValue().delay--;
-                continue;
-            }
+            Map.Entry<Pair<Body, Body>, Contact> entry = iterator.next();
             Entity entityA = this.bodyMap.get(entry.getKey().val0);
             Entity entityB = this.bodyMap.get(entry.getKey().val1);
             if (entityA == null || entityB == null) {
@@ -191,13 +172,10 @@ public class Game implements ContactListener {
             if (entityA == null || entityB == null)
                 return;
             if (this.contacts.containsKey(new Pair<>(contact.m_fixtureA.m_body,
-                    contact.m_fixtureB.m_body)))
+                                                     contact.m_fixtureB.m_body)))
                 return;
-            int contactDelay = entityA.getContactDelay(entityB) +
-                    entityB.getContactDelay(entityA);
             this.contacts.put(new Pair<>(contact.m_fixtureA.m_body,
-                            contact.m_fixtureB.m_body),
-                    new ContactData(contact, contactDelay));
+                                         contact.m_fixtureB.m_body), contact);
         }
     }
 

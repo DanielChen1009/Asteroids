@@ -49,19 +49,19 @@ public class GameView extends GroupLayer {
             for (Entity entity : this.game.getEntities())
                 this.paintEntity(surf, entity);
             this.textLayer.addText(new Text(
-                    "Press ESC to restart. Score: " + this.game.score() +
-                            " Ammo: " + this.game.ship.ammo, 0, 0));
-            if (!this.game.ship.isActive()) {
-                Text message = new Text(
-                        "GAME OVER", this.viewSize.width() / 2,
-                        this.viewSize.height() / 2);
+                    "Press ESC to restart. Score: " + this.game
+                            .score() + " Ammo: " + this.game.ship.ammo, 0, 0));
+            if (!this.game.ship.active) {
+                Text message = new Text("GAME OVER", this.viewSize.width() / 2,
+                                        this.viewSize.height() / 2);
                 message.centered = true;
                 this.textLayer.addText(message);
-            } else if (!this.game.ship.powerups.isEmpty()) {
+            }
+            else if (!this.game.ship.powerups.isEmpty()) {
                 StringBuilder message = new StringBuilder();
                 for (Map.Entry<Powerup.Type, Integer> entry :
                         this.game.ship.powerups
-                                .entrySet()) {
+                        .entrySet()) {
                     message.append(entry.getKey().message);
                     if (entry.getKey().showTime)
                         message.append(" (").append(entry.getValue())
@@ -71,9 +71,9 @@ public class GameView extends GroupLayer {
                 }
                 Vec2 p = this.game.ship.primaryBody.getCenter();
                 Text text = new Text(message.toString(),
-                        p.x * this.viewSize.width(),
-                        (p.y - Config.SHIP_MESSAGE_VERTICAL_OFFSET) *
-                                this.viewSize.height());
+                                     p.x * this.viewSize.width(),
+                                     (p.y - Config.SHIP_MESSAGE_VERTICAL_OFFSET) * this.viewSize
+                                             .height());
                 text.size = 10;
                 text.centered = true;
                 this.textLayer.addText(text);
@@ -92,14 +92,22 @@ public class GameView extends GroupLayer {
                             .map((Powerup.Type type) -> type.color)
                             .collect(Collectors.toList());
                     choices.add(Config.SHIP_COLOR);
-                    surf.setFillColor(choices.get(this.game.rand.nextInt(
-                            choices.size())));
-                } else
+                    surf.setFillColor(choices.get(
+                            this.game.rand.nextInt(choices.size())));
+                }
+                else
                     surf.setFillColor(Config.SHIP_COLOR);
-            } else if (entity instanceof Bullet)
+            }
+            else if (entity instanceof Bullet)
                 surf.setFillColor(Config.BULLET_COLOR);
-            else if (entity instanceof Rock)
+            else if (entity instanceof Rock) {
                 surf.setFillColor(Config.ROCK_COLOR);
+                Rock rock = (Rock) entity;
+                // Give a fading effect to debris.
+                surf.setAlpha(rock.isDebris ?
+                                      (float) rock.lifetime / Config.DEBRIS_LIFETIME :
+                                      1f);
+            }
             else if (entity instanceof Powerup)
                 surf.setFillColor(((Powerup) entity).type.color);
             else
@@ -111,22 +119,14 @@ public class GameView extends GroupLayer {
         }
 
         private void paintBody(Surface surf, EntityBody body) {
-            int size = body.getPoints().size();
+            Vec2[] points = body.getPoints();
+            int size = points.length;
             for (int i = 0; i < size; ++i) {
-                surf.drawLine(
-                        (body.getCenter().x +
-                                body.getPoints().get(i % size).x) *
-                                this.width(),
-                        (body.getCenter().y +
-                                body.getPoints().get(i % size).y) *
-                                this.height(),
-                        (body.getCenter().x +
-                                body.getPoints().get((i + 1) % size).x) *
-                                this.width(),
-                        (body.getCenter().y +
-                                body.getPoints().get((i + 1) % size).y) *
-                                this.height(),
-                        Config.LINE_WIDTH);
+                surf.drawLine((points[i % size].x) * this.width(),
+                              (points[i % size].y) * this.height(),
+                              (points[(i + 1) % size].x) * this.width(),
+                              (points[(i + 1) % size].y) * this.height(),
+                              Config.LINE_WIDTH);
             }
         }
     }
@@ -170,10 +170,8 @@ public class GameView extends GroupLayer {
                 TextFormat format = new TextFormat(font);
                 TextLayout layout = this.plat.graphics()
                         .layoutText(text.text, format);
-                canvas.setFillColor(0xFFFFFFFF).fillText(layout,
-                        text.centered ?
-                                text.x - layout.size.width() / 2 : text.x,
-                        text.y);
+                canvas.setFillColor(0xFFFFFFFF).fillText(layout, text.centered ?
+                        text.x - layout.size.width() / 2 : text.x, text.y);
             }
             this.setTile(canvas.toTexture());
             this.texts.clear();

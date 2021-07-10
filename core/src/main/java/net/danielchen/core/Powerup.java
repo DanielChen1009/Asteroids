@@ -11,10 +11,9 @@ public class Powerup extends Entity {
     // The type of this powerup with associated powerup-specific parameters.
     enum Type {
         AMMO(0xFF2288AA, 20, "+" + Config.POWERUP_AMMO_INCREASE + " ammo",
-                false,
-                Config.AMMO_SPAWN_RATE),
+             false, Config.AMMO_SPAWN_RATE),
         INVINCIBLE(0xFFFFFF00, 200, "invincible", true,
-                Config.INVINCIBLE_SPAWN_RATE),
+                   Config.INVINCIBLE_SPAWN_RATE),
         MEGAGUN(0xFFFF2222, 200, "megagun", true, Config.MEGAGUN_SPAWN_RATE);
 
         Type(int color, int time, String message, boolean showTime,
@@ -39,7 +38,7 @@ public class Powerup extends Entity {
     Type type;
 
     public Powerup(Game game, Vec2 center, Type type) {
-        super("POWERUP", game);
+        super(Entity.Type.POWERUP, game);
         this.type = type;
         List<Vec2> primaryBody = new ArrayList<>();
         // All powerups are squares.
@@ -49,7 +48,8 @@ public class Powerup extends Entity {
         primaryBody.add(new Vec2(size, size));
         primaryBody.add(new Vec2(size, -size));
         this.setPrimaryBody(new EntityBody(this, game, primaryBody, center));
-        this.speed = this.rand.nextGaussian() * 0.001 + 0.005;
+        this.speed = this.rand
+                .nextGaussian() * Config.BASE_POWERUP_SPEED / 10 + Config.BASE_POWERUP_SPEED;
         this.angle = this.rand.nextGaussian() * Math.PI * 2.0;
         this.lifetimeRemaining = Config.POWERUP_LIFETIME;
     }
@@ -61,22 +61,31 @@ public class Powerup extends Entity {
             this.lifetimeRemaining--;
         else
             this.active = false;
+
         this.speed *= this.rand.nextGaussian() * 0.01 + 1.0;
         this.angle *= this.rand.nextGaussian() * 0.01 + 1.0;
 
         // Make the powerup attract towards the ship at a certain distance.
         Vec2 p1 = this.primaryBody.getCenter();
         Vec2 p2 = this.game.ship.primaryBody.getCenter();
-        if (this.game.ship.isActive() &&
-                MathUtils.distance(p1, p2) < Config.POWERUP_ATTRACT_DISTANCE) {
-            double v = this.rand.nextGaussian() * 0.003 + 0.02;
-            this.dx += v * (p2.x - p1.x);
-            this.dy += v * (p2.y - p1.y);
-        } else {
-            this.dx = (float) (this.speed * Math.cos(this.angle));
-            this.dy = (float) (this.speed * Math.sin(this.angle));
+        if (this.game.ship.active && MathUtils
+                .distance(p1, p2) < Config.POWERUP_ATTRACT_DISTANCE) {
+            float v = (float) (this.rand
+                    .nextGaussian() * Config.POWERUP_ATTRACT_FORCE / 10 + Config.POWERUP_ATTRACT_FORCE);
+            this.applyForce(new Vec2(p2.x - p1.x, p2.y - p1.y).mul(v));
+        }
+        else if (this.primaryBody.getLinearVelocity()
+                .length() < Config.MAX_POWERUP_SPEED) {
+            float dx = (float) (this.speed * Math.cos(this.angle));
+            float dy = (float) (this.speed * Math.sin(this.angle));
+            this.applyForce(new Vec2(dx, dy));
         }
         super.update();
+    }
+
+    @Override
+    public int excludedCollisions() {
+        return Entity.Type.BULLET.category | Entity.Type.POWERUP.category | Entity.Type.ROCK.category;
     }
 
     @Override
