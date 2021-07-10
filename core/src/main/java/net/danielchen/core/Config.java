@@ -4,7 +4,7 @@ public class Config {
     /**
      * For debugging purposes only.
      */
-    public static boolean GOD_MODE = true;
+    public static boolean GOD_MODE = false;
 
     /**
      * GUI related config.
@@ -48,11 +48,11 @@ public class Config {
     public static double LOW_AMMO_SPAWN_RATE = 0.01;
 
     public static float BULLET_SIZE = 1.0f / 800;
-    public static float BULLET_SPEED = 40f;
+    public static float BULLET_SPEED = 38f;
     public static int BULLET_LIFETIME = 18;
 
     public static float MEGABULLET_SIZE = BULLET_SIZE * 4;
-    public static float MEGABULLET_SPEED = BULLET_SPEED * 1.4f;
+    public static float MEGABULLET_SPEED = BULLET_SPEED * 1.2f;
     public static int MEGABULLET_LIFETIME = (int) (BULLET_LIFETIME * 1.2);
 
     public static int MEGAGUN_SHOTS = 5;
