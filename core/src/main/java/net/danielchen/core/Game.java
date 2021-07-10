@@ -97,19 +97,18 @@ public class Game implements ContactListener {
         // Manage ship firing logic.
         if (this.ship.active && this.ship.ammo > 0) {
             if ((this.isFiring || this.pointerFire) && this.ship.cooldown == 0) {
-                Vec2 bulletLoc = this.ship.primaryBody.getCenter().clone();
+                Vec2 bulletLoc = this.ship.getCenter().clone();
                 if (this.ship.powerups.containsKey(Powerup.Type.MEGAGUN)) {
                     for (int i = -Config.MEGAGUN_SHOTS / 2;
                          i <= Config.MEGAGUN_SHOTS / 2; i++) {
-                        this.addEntity(new Bullet(this, bulletLoc,
-                                this.ship.primaryBody
-                                        .getAngle() + Config.MEGAGUN_SPREAD * i));
+                        this.addEntity(new Bullet(this, bulletLoc, this.ship
+                                .getAngle() + Config.MEGAGUN_SPREAD * i));
                     }
                 }
                 else
-                    this.addEntity(new Bullet(this, bulletLoc,
-                            this.ship.primaryBody.getAngle(),
-                            Config.BULLET_SPEED));
+                    this.addEntity(
+                            new Bullet(this, bulletLoc, this.ship.getAngle(),
+                                    Config.BULLET_SPEED));
                 this.ship.cooldown = Config.COOLDOWN;
                 this.ship.ammo--;
                 if (this.pointerFire)
@@ -174,9 +173,9 @@ public class Game implements ContactListener {
 
     public void processPointerDrag(float x, float y) {
         this.pointerDuration = -1;
-        Vec2 p = this.ship.primaryBody.getCenter();
+        Vec2 p = this.ship.getCenter();
         float angle = (float) Math.atan2(y - p.y, x - p.x);
-        float dA = angle - this.ship.primaryBody.getAngle();
+        float dA = angle - this.ship.getAngle();
         this.ship.pointerTurn = (float) Math.atan2(Math.sin(dA), Math.cos(dA));
         this.ship.pointerDistance = MathUtils.distance(p, new Vec2(x, y));
     }

@@ -52,7 +52,7 @@ public class Powerup extends Entity {
         this.setPrimaryBody(new EntityBody(this, game, primaryBody, center));
         this.speed = this.rand
                 .nextGaussian() * Config.BASE_POWERUP_SPEED / 10 + Config.BASE_POWERUP_SPEED;
-        this.angle = this.game.ship.primaryBody.getAngle() + this.rand
+        this.angle = this.game.ship.getAngle() + this.rand
                 .nextGaussian() * Math.PI / 4;
         this.lifetimeRemaining = Config.POWERUP_LIFETIME;
     }
@@ -69,19 +69,24 @@ public class Powerup extends Entity {
         this.angle *= this.rand.nextGaussian() * 0.01 + 1.0;
 
         // Make the powerup attract towards the ship at a certain distance.
-        Vec2 p1 = this.primaryBody.getCenter();
-        Vec2 p2 = this.game.ship.primaryBody.getCenter();
+        Vec2 p1 = this.getCenter();
+        Vec2 p2 = this.game.ship.getCenter();
         if (this.game.ship.active && MathUtils
                 .distance(p1, p2) < Config.POWERUP_ATTRACT_DISTANCE) {
             float v = (float) (this.rand
                     .nextGaussian() * Config.POWERUP_ATTRACT_FORCE / 10 + Config.POWERUP_ATTRACT_FORCE);
             this.applyForce(new Vec2(p2.x - p1.x, p2.y - p1.y).mul(v));
+            this.lifetimeRemaining++;
         }
-        else if (this.primaryBody.getLinearVelocity()
-                .length() < Config.MAX_POWERUP_SPEED) {
+        else if (this.getSpeed() < Config.MAX_POWERUP_SPEED) {
+            // Randomly push the powerup around.
             float dx = (float) (this.speed * Math.cos(this.angle));
             float dy = (float) (this.speed * Math.sin(this.angle));
             this.applyForce(new Vec2(dx, dy));
+        }
+        if (this.getSpeed() > Config.MAX_POWERUP_SPEED) {
+            // Slow it down if too fast.
+            this.applyForce(this.getLinearVelocity().negate());
         }
         super.update();
     }

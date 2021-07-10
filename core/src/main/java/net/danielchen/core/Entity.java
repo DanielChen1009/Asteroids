@@ -1,6 +1,7 @@
 package net.danielchen.core;
 
 import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 
@@ -46,7 +47,7 @@ class EntityBody {
 
         PolygonShape polygonShape = new PolygonShape();
         polygonShape.set(points.stream().map(v -> v.mul(Config.WORLD_SCALE))
-                                 .toArray(Vec2[]::new), points.size());
+                .toArray(Vec2[]::new), points.size());
         fixtureDef.shape = polygonShape;
         fixtureDef.restitution = 0.9f;
         fixtureDef.density = 1.0f;
@@ -55,7 +56,7 @@ class EntityBody {
         fixtureDef.filter.maskBits &= ~entity.excludedCollisions();
         this.body.createFixture(fixtureDef);
         this.body.setTransform(new Vec2(center.x * Config.WORLD_SCALE,
-                                        center.y * Config.WORLD_SCALE), 0);
+                center.y * Config.WORLD_SCALE), 0);
         this.body.setBullet(entity instanceof Bullet);
 
         if (physicsEnabled)
@@ -76,7 +77,7 @@ class EntityBody {
 
     void applyForce(Vec2 v) {
         this.body.applyForce(v.mul(Config.WORLD_SCALE),
-                             this.body.getWorldCenter());
+                this.body.getWorldCenter());
     }
 
     // Returns the normalized center [0, 1].
@@ -100,9 +101,8 @@ class EntityBody {
 
     void wrap(Edge edge) {
         this.body.setTransform(this.body.getWorldCenter()
-                                       .add(new Vec2(edge.dx, edge.dy)
-                                                    .mul(Config.WORLD_SCALE)),
-                               this.body.getAngle());
+                        .add(new Vec2(edge.dx, edge.dy).mul(Config.WORLD_SCALE)),
+                this.body.getAngle());
     }
 
     public Set<Edge> getOutOfBounds() {
@@ -122,9 +122,8 @@ class EntityBody {
 
     EntityBody copy() {
         EntityBody copied = new EntityBody(this.entity, this.game,
-                                           new ArrayList<>(this.points),
-                                           this.getCenter().clone(),
-                                           this.physicsEnabled);
+                new ArrayList<>(this.points), this.getCenter().clone(),
+                this.physicsEnabled);
         copied.setTransform(this.getCenter(), this.getAngle());
         copied.setAngularVelocity(this.getAngularVelocity());
         copied.setLinearVelocity(this.getLinearVelocity());
@@ -207,7 +206,7 @@ public class Entity {
                 // destroy all wrap bodies.
                 if (wrapBody.getOutOfBounds().isEmpty()) {
                     this.primaryBody.setTransform(wrapBody.getCenter(),
-                                                  wrapBody.getAngle());
+                            wrapBody.getAngle());
                     this.primaryBody
                             .setAngularVelocity(wrapBody.getAngularVelocity());
                     this.primaryBody
@@ -265,6 +264,26 @@ public class Entity {
         for (EntityBody entityBody : this.wrapBodies.values()) {
             entityBody.setLinearVelocity(v);
         }
+    }
+
+    Vec2 getLinearVelocity() {
+        return this.primaryBody.getLinearVelocity();
+    }
+
+    float getAngle() {
+        return this.primaryBody.getAngle();
+    }
+
+    float getSpeed() {
+        return this.primaryBody.getLinearVelocity().length();
+    }
+
+    Vec2 getCenter() {
+        return this.primaryBody.getCenter();
+    }
+
+    float getDistance(Entity other) {
+        return MathUtils.distance(this.getCenter(), other.getCenter());
     }
 
     public void destroy() {

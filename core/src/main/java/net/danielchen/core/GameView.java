@@ -116,7 +116,7 @@ public class GameView extends GroupLayer {
                     }
                 }
                 if (message.length() > 0) {
-                    Vec2 p = this.game.ship.primaryBody.getCenter();
+                    Vec2 p = this.game.ship.getCenter();
                     Text text = new Text(message.toString(),
                             p.x * this.viewSize.width(),
                             (p.y - Config.SHIP_MESSAGE_VERTICAL_OFFSET) * this.viewSize
@@ -147,8 +147,11 @@ public class GameView extends GroupLayer {
                 else
                     surf.setFillColor(Config.SHIP_COLOR);
             }
-            else if (entity instanceof Bullet)
-                surf.setFillColor(Config.BULLET_COLOR);
+            else if (entity instanceof Bullet) {
+                Bullet bullet = (Bullet) entity;
+                surf.setFillColor(bullet.type == Bullet.Type.MEGA ?
+                        Config.MEGABULLET_COLOR : Config.BULLET_COLOR);
+            }
             else if (entity instanceof Rock) {
                 surf.setFillColor(Config.ROCK_COLOR);
                 Rock rock = (Rock) entity;

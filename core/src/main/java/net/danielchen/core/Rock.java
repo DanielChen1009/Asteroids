@@ -34,14 +34,14 @@ public class Rock extends Entity {
         super(Type.ROCK, parent.game);
         this.isDebris = false;
         this.size = parent.size * (this.rand.nextDouble() + 0.5) * 0.5;
-        Vec2 center = parent.primaryBody.getCenter().clone();
+        Vec2 center = parent.getCenter().clone();
         center.x += 0.2 * this.rand.nextGaussian() * (parent.size + this.size);
         center.y += 0.2 * this.rand.nextGaussian() * (parent.size + this.size);
         this.setPrimaryBody(this.createRock(this.game, center));
         this.speed = parent.speed * (this.rand.nextGaussian() * 0.1 + 0.8);
         this.rotationSpeed = parent.rotationSpeed * (float) (this.rand
                 .nextGaussian() * 0.1 + 0.8);
-        this.travelAngle = collider.primaryBody.getAngle() + (float) angle;
+        this.travelAngle = collider.getAngle() + (float) angle;
         this.setVelocities();
     }
 
@@ -104,13 +104,11 @@ public class Rock extends Entity {
         // Spawn some debris to simulate explosion.
         int numDebris = this.rand.nextInt(4) + 3;
         for (int i = 0; i < numDebris; i++) {
-            Rock debris = new Rock(this.game,
-                    this.primaryBody.getCenter().clone(), this.size * 0.1,
-                    true);
+            Rock debris = new Rock(this.game, this.getCenter().clone(),
+                    this.size * 0.1, true);
             debris.lifetime = Config.DEBRIS_LIFETIME + (int) (this.rand
                     .nextGaussian() * Config.DEBRIS_LIFETIME / 5);
-            debris.speed = this.primaryBody.getLinearVelocity()
-                    .length() * 3 + this.rand
+            debris.speed = this.getLinearVelocity().length() * 3 + this.rand
                     .nextGaussian() * Config.BASE_ROCK_SPEED / 10;
             this.game.addEntity(debris);
         }
@@ -130,8 +128,9 @@ public class Rock extends Entity {
         for (Powerup.Type powerup : Powerup.Type.values()) {
             if (this.rand.nextDouble() < powerup.spawnRate / Math
                     .pow(this.game.world.getBodyCount(), 0.7)) {
-                this.game.addEntity(new Powerup(this.game,
-                        this.primaryBody.getCenter().clone(), powerup));
+                this.game.addEntity(
+                        new Powerup(this.game, this.getCenter().clone(),
+                                powerup));
             }
         }
 

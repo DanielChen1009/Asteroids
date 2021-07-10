@@ -4,7 +4,7 @@ public class Config {
     /**
      * For debugging purposes only.
      */
-    public static boolean GOD_MODE = false;
+    public static boolean GOD_MODE = true;
 
     /**
      * GUI related config.
@@ -12,6 +12,7 @@ public class Config {
     // Default entity colors
     public static int SHIP_COLOR = 0xFF00FF00;
     public static int BULLET_COLOR = 0xFF2288AA;
+    public static int MEGABULLET_COLOR = 0xFFFF88AA;
     public static int ROCK_COLOR = 0xFFAAAAAA;
     public static int UNKNOWN_COLOR = 0xFFFFFFFF;
 
@@ -39,6 +40,9 @@ public class Config {
     // The turn speed of the ship when mouse/touch is pressed/held.
     public static float SHIP_POINTER_TURN_SPEED = 400;
 
+    // The max speed the ship can reach.
+    public static float SHIP_MAX_SPEED = 20;
+
     // The amount of ammo the player starts with.
     public static int INITIAL_AMMO = 100;
 
@@ -53,7 +57,7 @@ public class Config {
     public static int LOW_AMMO_THRESHOLD = 10;
     public static double LOW_AMMO_SPAWN_RATE = 0.01;
 
-    public static float BULLET_SIZE = 1.0f / 800;
+    public static float BULLET_SIZE = 1.0f / 500;
     public static float BULLET_SPEED = 38f;
     public static int BULLET_LIFETIME = 18;
 
@@ -74,10 +78,10 @@ public class Config {
 
     // The distance at which the powerup starts getting attracted towards the
     // player ship.
-    public static double POWERUP_ATTRACT_DISTANCE = 0.15;
+    public static double POWERUP_ATTRACT_DISTANCE = 0.18;
 
     // The force at which the powerup is attracted to the player.
-    public static double POWERUP_ATTRACT_FORCE = 2000;
+    public static double POWERUP_ATTRACT_FORCE = 3000;
 
     /**
      * Physics related config.
@@ -102,13 +106,13 @@ public class Config {
     public static double AMMO_SPAWN_RATE = 2.0;
 
     // The higher this number is, the more invincible powerup will spawn.
-    public static double INVINCIBLE_SPAWN_RATE = 0.5;
+    public static double INVINCIBLE_SPAWN_RATE = 0.3;
 
     // The higher this number is, the more megagun powerup will spawn.
-    public static double MEGAGUN_SPAWN_RATE = 0.2;
+    public static double MEGAGUN_SPAWN_RATE = 0.12;
 
     // The higher this number is, the more exetra lif powerup will spawn.
-    public static double EXTRA_LIFE_SPAWN_RATE = 0.4;
+    public static double EXTRA_LIFE_SPAWN_RATE = 0.3;
 
     // The average rock size that is randomly generated.
     public static double BASE_ROCK_SIZE = 0.05;
@@ -118,7 +122,7 @@ public class Config {
 
     // The minimum size a rock can be in order to spawn smaller rocks upon
     // being shot.
-    public static double MIN_ROCK_BREAK_UP_SIZE = 0.05;
+    public static double MIN_ROCK_BREAK_UP_SIZE = 0.04;
 
     // The maximum number of rocks that should exist on-screen.
     public static int MAX_ROCKS = 50;
