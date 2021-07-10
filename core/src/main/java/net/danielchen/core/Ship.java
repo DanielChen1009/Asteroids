@@ -12,6 +12,7 @@ public class Ship extends Entity {
     Map<Powerup.Type, Integer> powerups;
     int ammo = Config.INITIAL_AMMO;
     int cooldown = Config.COOLDOWN;
+    int extraLives = 0;
 
     public Ship(Game game, Vec2 center) {
         super(Type.SHIP, game);
@@ -67,18 +68,12 @@ public class Ship extends Entity {
     }
 
     @Override
-    public int excludedCollisions() {
-        int exclusions = Type.BULLET.category;
-        if (this.powerups.containsKey(Powerup.Type.INVINCIBLE))
-            exclusions |= Type.ROCK.category;
-        return exclusions;
-    }
-
-    @Override
     public void contact(Entity other, Body myBody, Body otherBody) {
         if (other instanceof Bullet || other instanceof Ship)
             return;
         if (other instanceof Rock && ((Rock) other).isDebris)
+            return;
+        if (this.immortalTime > 0)
             return;
 
         // Process contact with powerups. Powerup times stack.
@@ -87,30 +82,35 @@ public class Ship extends Entity {
             powerup.active = false;
             if (powerup.type == Powerup.Type.AMMO)
                 this.ammo += Config.POWERUP_AMMO_INCREASE;
+            if (powerup.type == Powerup.Type.EXTRA_LIFE)
+                this.extraLives++;
             if (!this.powerups.containsKey(powerup.type)) {
                 this.powerups.put(powerup.type, powerup.type.time);
             }
             else {
-                this.powerups.put(powerup.type, this.powerups
-                        .get(powerup.type) + powerup.type.time);
+                this.powerups.put(powerup.type,
+                        this.powerups.get(powerup.type) + powerup.type.time);
             }
             return;
         }
 
         // Process death only if we are not invincible.
         if (!this.powerups.containsKey(Powerup.Type.INVINCIBLE)) {
-            super.contact(other, myBody, otherBody);
-            // When the ship dies, do a radial burst of bullets for special
-            // effect.
+            // If we have extra lives, use that instead of actually dying.
+            if (this.extraLives > 0) {
+                this.extraLives--;
+                this.immortalTime = 5;
+            }
+            else
+                super.contact(other, myBody, otherBody);
+            // Do a radial burst of bullets for special effect.
             int numBullets = this.rand.nextInt(20) + 20;
             for (int i = 0; i < numBullets; i++) {
                 this.game.addEntity(new Bullet(this.game,
-                                               this.primaryBody.getCenter()
-                                                       .clone(),
-                                               (float) (i * ((this.rand
-                                                       .nextFloat() + 1) * Math.PI / numBullets)),
-                                               Config.BULLET_SPEED * this.rand
-                                                       .nextFloat()));
+                        this.primaryBody.getCenter().clone(),
+                        (float) (i * ((this.rand
+                                .nextFloat() + 1) * Math.PI / numBullets)),
+                        Config.BULLET_SPEED * this.rand.nextFloat()));
             }
         }
     }

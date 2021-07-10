@@ -89,11 +89,6 @@ public class Rock extends Entity {
     }
 
     @Override
-    public int excludedCollisions() {
-        return Type.POWERUP.category;
-    }
-
-    @Override
     public void contact(Entity other, Body myBody, Body otherBody) {
         if (this.isDebris)
             return;

@@ -54,11 +54,6 @@ public class Bullet extends Entity {
     }
 
     @Override
-    public int excludedCollisions() {
-        return Type.BULLET.category | Type.SHIP.category | Type.POWERUP.category;
-    }
-
-    @Override
     public void contact(Entity other, Body myBody, Body otherBody) {
         if (other instanceof Bullet || other instanceof Ship || other instanceof Powerup)
             return;

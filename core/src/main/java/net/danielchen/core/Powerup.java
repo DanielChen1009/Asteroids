@@ -11,10 +11,12 @@ public class Powerup extends Entity {
     // The type of this powerup with associated powerup-specific parameters.
     enum Type {
         AMMO(0xFF2288AA, 20, "+" + Config.POWERUP_AMMO_INCREASE + " ammo",
-             false, Config.AMMO_SPAWN_RATE),
+                false, Config.AMMO_SPAWN_RATE),
         INVINCIBLE(0xFFFFFF00, 200, "invincible", true,
-                   Config.INVINCIBLE_SPAWN_RATE),
-        MEGAGUN(0xFFFF2222, 200, "megagun", true, Config.MEGAGUN_SPAWN_RATE);
+                Config.INVINCIBLE_SPAWN_RATE),
+        MEGAGUN(0xFFFF2222, 200, "megagun", true, Config.MEGAGUN_SPAWN_RATE),
+        EXTRA_LIFE(0xFF00FF00, 20, "extra life!", false,
+                Config.EXTRA_LIFE_SPAWN_RATE);
 
         Type(int color, int time, String message, boolean showTime,
              double spawnRate) {
@@ -81,11 +83,6 @@ public class Powerup extends Entity {
             this.applyForce(new Vec2(dx, dy));
         }
         super.update();
-    }
-
-    @Override
-    public int excludedCollisions() {
-        return Entity.Type.BULLET.category | Entity.Type.POWERUP.category | Entity.Type.ROCK.category;
     }
 
     @Override

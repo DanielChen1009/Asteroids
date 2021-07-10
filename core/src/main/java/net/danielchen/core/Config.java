@@ -98,6 +98,9 @@ public class Config {
     // The higher this number is, the more megagun powerup will spawn.
     public static double MEGAGUN_SPAWN_RATE = 0.2;
 
+    // The higher this number is, the more exetra lif powerup will spawn.
+    public static double EXTRA_LIFE_SPAWN_RATE = 0.4;
+
     // The average rock size that is randomly generated.
     public static double BASE_ROCK_SIZE = 0.05;
 
